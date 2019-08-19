@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <share_mem.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main(int argc, const char *argv[])
+{
+	int shmid, status;
+	pid_t pid;
+	void *ptr;
+
+	pid = fork();
+	if (pid > 0) {
+		shmid = shm_open("/", 'a', 100);
+		if (shmid < 0) {
+			printf("errno: %d\n", errno);
+			goto out;
+		}
+		ptr = shm_attach_ptr(shmid);
+		if (ptr == NULL)
+			goto out;
+
+		printf("attach num:%d\n", shm_attach_num(shmid));
+		sleep(1);
+
+		memcpy(ptr, "hello world", 11);
+
+	} else if (pid == 0){
+		shmid = shm_open("/", 'a', 100);
+		if (shmid < 0) {
+			printf("errno: %d\n", errno);
+			goto out;
+		}
+		ptr = shm_attach_ptr(shmid);
+		if (ptr == NULL)
+			goto out;
+		sleep(1);
+		printf("attach num:%d\n", shm_attach_num(shmid));
+
+		printf("%s\n", (char *)ptr);
+
+	} else {
+		exit(1);
+	}
+
+out:
+	wait(&status);
+
+	shm_destroy(shmid);
+	return 0;
+}
