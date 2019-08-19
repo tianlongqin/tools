@@ -7,19 +7,6 @@
 #define print_hex_dump_debug
 #endif
 
-#define BIO_W_NULL(r, func) do { \
-		if ((r = func) == NULL) \
-			printf("func->" #func " line:%d " #r "=%d warning\n", __LINE__, r); \
-	} while (0) \
-
-#define BIO_E_NULL(r, func) do { \
-		if ((r = func) == NULL) {\
-			printf("func->" #func " line:%d " #r "=%d error\n", __LINE__, r); \
-			exit(1); \
-		} 		\
-	} while (0) \
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
