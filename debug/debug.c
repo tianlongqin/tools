@@ -28,6 +28,41 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/time.h>
+#include <stdarg.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <pthread.h>
+
+void print_err(int line, const char *func, const char *szFormat, ...)
+{
+	char pDate[512] = {0};
+	struct timeval start;
+	gettimeofday(&start, NULL);
+	sprintf(pDate, "ERR->[%ld:%ld] [%d-%ld] [%s-%s:(%d)]:",
+			start.tv_sec, start.tv_usec, getpid(), pthread_self(), __FILE__, func, line);
+	va_list valist;
+	va_start(valist, szFormat);
+	vsnprintf(pDate + strlen(pDate), 512 - strlen(pDate), szFormat, valist);
+	va_end(valist);
+
+	printf("\033[31m%s\033[0m", pDate);
+}
+
+void print_info(int line, const char *func, const char *szFormat, ...)
+{
+	char pDate[512] = {0};
+	struct timeval start;
+	gettimeofday(&start, NULL);
+	sprintf(pDate, "INFO->[%ld:%ld] [%d-%ld] [%s-%s:(%d)]:",
+			start.tv_sec, start.tv_usec, getpid(), pthread_self(), __FILE__, func, line);
+	va_list valist;
+	va_start(valist, szFormat);
+	vsnprintf(pDate + strlen(pDate), 512 - strlen(pDate), szFormat, valist);
+	va_end(valist);
+
+	printf("%s", pDate);
+}
 
 void print_hex_dump(const char *prompt, const void *buffer, size_t size)
 {
