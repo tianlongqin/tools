@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-extern int file_b_fifo(int fd, int type);// Determine whether the file type is fifo
+extern int file_check_type(int fd, int type);// Determine whether the file type is fifo
 
 #ifdef __cplusplus 
 }

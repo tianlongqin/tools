@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
-int file_b_fifo(int fd, int type)
+int file_check_type(int fd, int type)
 {
 	struct stat stat;
 
