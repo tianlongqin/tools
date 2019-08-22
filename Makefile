@@ -1,4 +1,4 @@
-include .config
+sinclude .config
 
 CC              ?= $(CROSS_COMPILE)gcc
 STRIP           ?= $(CROSS_COMPILE)strip
