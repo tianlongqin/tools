@@ -30,28 +30,55 @@ CFLAGS = -fPIC
 
 build = ./build
 build_objs = $(build)/*.o
+INCLUDE = $(addprefix -I, $(dirs))
 
 so_name = libtool.so
 ar_name = libtool.a
 
-INCLUDE = $(addprefix -I, $(dirs))
-
+PHONY += default
 default: $(obj)
 	@mkdir -p build && mv $^ $(build)
 
+PHONY += all
+all: so ar
+
+PHONY += so
 so: default
 	$(CC) -shared $(build_objs)  -o $(so_name) $(LIB)
 	mv $(so_name) $(build)
 
+PHONY += ar
 ar: default
 	$(AR) -crs $(ar_name) $(build_objs)
 	mv $(ar_name) $(build)
 
-menuconfig:
-	./scripts/mconf Config.in
-
 %.o:%.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDE)
 
+PHONY += menuconfig
+menuconfig:
+	./scripts/mconf Config.in
+
+PHONY += clean
 clean:
 	rm -rf $(build)
+
+PHONY += mrproper
+mrproper:
+	rm -rf $(build) .config
+
+PHONY += help
+help:
+	@echo 'Cleaning targets:'
+	@echo '  clean          - Remove most generated files'
+	@echo '  mrproper       - Remove all generated files + .config'
+	@echo 'Building targets:'
+	@echo '  all            - Build all'
+	@echo '  so             - Build shared library'
+	@echo '  ar             - Build static library'
+	@echo 'Config targets:'
+	@echo '  menuconfig     - Config file'
+
+
+
+.PHONY: $(PHONY)
