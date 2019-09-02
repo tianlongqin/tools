@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+#include <serial_func.h>
+
+int main(int argc, const char *argv[])
+{
+	int fd = 0, rc = 0, i;
+	char buf[64] = {0};
+	fd_set set;
+
+	fd = serial_open_with_arg("/dev/ttyUSB0", 1, 115200, 8, 1, 'N', 'n');
+	if (fd < 0) {
+		printf("serial_open_with_arg faile\n");
+		exit(1);
+	}
+
+	FD_ZERO(&set);
+	FD_SET(fd, &set);
+
+	while (1) {
+		select(fd +1, &set, NULL, NULL, 0);
+		if(!FD_ISSET(fd, &set))
+			continue;
+
+		FD_SET(fd, &set);
+		rc = read(fd, buf, sizeof(buf));
+		if (rc < 0)
+			printf("errno:%d\n", errno);
+
+		printf("%s\n", buf);
+		memset(buf, 0, sizeof(buf));
+	}
+}
+

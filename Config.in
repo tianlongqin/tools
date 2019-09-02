@@ -24,3 +24,8 @@ config  THREADPOOL
 bool    "Thread pool tool, Be related to thread pool"
 default  y
 help
+
+config  SERIAL
+bool    "serial port tool, Be related to serial port"
+default  y
+help

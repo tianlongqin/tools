@@ -22,6 +22,9 @@ ifeq ($(CONFIG_THREADPOOL),y)
 	dirs += thread_pool
 endif
 
+ifeq ($(CONFIG_SERIAL),y)
+	dirs += serial
+endif
 src := $(foreach dir,$(dirs),$(wildcard $(dir)/*.c))
 obj := $(patsubst %.c, %.o, $(src))
 
