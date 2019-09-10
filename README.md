@@ -16,6 +16,8 @@
 * 存放make menuconfig生成脚本，目前只在X86_64上可以使用。
 ### 8、serial 目录
 * serial目录为串口应用层的设置，打开串口，设置频率、数据位、校验位、停止位等。
+### 9、timer 目录
+* timer目录为时间操作的接口集合，目前有解决嗜睡（oversleeping）问题的高精度sleep函数clk_nanosleep。
 
 ## 二、其他说明
 ### 1、快速开始
