@@ -25,6 +25,10 @@ endif
 ifeq ($(CONFIG_SERIAL),y)
 	dirs += serial
 endif
+
+ifeq ($(CONFIG_TIMER),y)
+	dirs += timer
+endif
 src := $(foreach dir,$(dirs),$(wildcard $(dir)/*.c))
 obj := $(patsubst %.c, %.o, $(src))
 

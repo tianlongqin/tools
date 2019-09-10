@@ -29,3 +29,8 @@ config  SERIAL
 bool    "serial port tool, Be related to serial port"
 default  y
 help
+
+config  TIMER
+bool    "time tool, Be related to time function"
+default  y
+help
