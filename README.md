@@ -12,12 +12,14 @@
 * semaphore目录为信号量接口集合，对system V信号量接口的外层封装，方便使用。
 ### 6、thread_pool 目录
 * thread_pool目录为线程池接口集合，对线程池进行了简单的实现，提供了相应接口可以使用。
+* 注意：使用thread_pool集合，需要连接-lpthead动态库。
 ### 7、scripts 目录
 * 存放make menuconfig生成脚本，目前只在X86_64上可以使用。
 ### 8、serial 目录
 * serial目录为串口应用层的设置，打开串口，设置频率、数据位、校验位、停止位等。
 ### 9、timer 目录
 * timer目录为时间操作的接口集合，目前有解决嗜睡（oversleeping）问题的高精度sleep函数clk_nanosleep。
+* 注意：使用timer集合的任意函数，在glibc 2.17版本之前都需要连接-lrt动态库。
 
 ## 二、其他说明
 ### 1、快速开始
