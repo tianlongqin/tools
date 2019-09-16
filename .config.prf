@@ -23,3 +23,7 @@ ifeq ($(CONFIG_TIMER),y)
 	dirs += timer
 endif
 
+ifeq ($(CONFIG_SIGNAL),y)
+	dirs += signal 
+endif
+

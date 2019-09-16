@@ -34,3 +34,8 @@ config  TIMER
 bool    "time tool, Be related to time function"
 default  y
 help
+
+config  SIGNAL
+bool    "signal tool, Be related to signal function"
+default  y
+help
