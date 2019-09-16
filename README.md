@@ -12,7 +12,7 @@
 * semaphore目录为信号量接口集合，对system V信号量接口的外层封装，方便使用。
 ### 6、thread_pool 目录
 * thread_pool目录为线程池接口集合，对线程池进行了简单的实现，提供了相应接口可以使用。
-* 注意：使用thread_pool集合，需要连接-lpthead动态库。
+* 注意：使用thread_pool集合，需要连接-lpthread动态库。
 ### 7、scripts 目录
 * 存放make menuconfig生成脚本，目前只在X86_64上可以使用。
 ### 8、serial 目录
