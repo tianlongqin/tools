@@ -20,7 +20,8 @@
 ### 9、timer 目录
 * timer目录为时间操作的接口集合，目前有解决嗜睡（oversleeping）问题的高精度sleep函数clk_nanosleep。
 * 注意：使用timer集合的任意函数，在glibc 2.17版本之前都需要连接-lrt动态库。
-
+### 10、signal 目录
+* signal目录为信号操作的接口集合，目前封装了信号阻塞/解除阻塞的函数接口，后续会添加更多的功能接口。
 ## 二、其他说明
 ### 1、快速开始
 * 先进行make menuconfig 进行集合配置，之后make all生成动态库和静态库。
