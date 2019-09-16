@@ -1,0 +1,25 @@
+dirs :=
+ifeq ($(CONFIG_DEBUG),y)
+	dirs += debug
+endif
+ifeq ($(CONFIG_FILE),y)
+	dirs += file
+endif
+ifeq ($(CONFIG_SEMAPHORE),y)
+	dirs += semaphore
+endif
+ifeq ($(CONFIG_SHAREMEM),y)
+	dirs += share_mem
+endif
+ifeq ($(CONFIG_THREADPOOL),y)
+	dirs += thread_pool
+endif
+
+ifeq ($(CONFIG_SERIAL),y)
+	dirs += serial
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+	dirs += timer
+endif
+

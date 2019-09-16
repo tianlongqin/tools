@@ -1,34 +1,10 @@
 sinclude .config
-
+sinclude .config.prf
 CC              ?= $(CROSS_COMPILE)gcc
 STRIP           ?= $(CROSS_COMPILE)strip
 AR              ?= $(CROSS_COMPILE)ar
 LD              ?= $(CROSS_COMPILE)ld
 
-dirs :=
-ifeq ($(CONFIG_DEBUG),y)
-	dirs += debug
-endif
-ifeq ($(CONFIG_FILE),y)
-	dirs += file
-endif
-ifeq ($(CONFIG_SEMAPHORE),y)
-	dirs += semaphore
-endif
-ifeq ($(CONFIG_SHAREMEM),y)
-	dirs += share_mem
-endif
-ifeq ($(CONFIG_THREADPOOL),y)
-	dirs += thread_pool
-endif
-
-ifeq ($(CONFIG_SERIAL),y)
-	dirs += serial
-endif
-
-ifeq ($(CONFIG_TIMER),y)
-	dirs += timer
-endif
 src := $(foreach dir,$(dirs),$(wildcard $(dir)/*.c))
 obj := $(patsubst %.c, %.o, $(src))
 
@@ -85,7 +61,5 @@ help:
 	@echo '  ar             - Build static library'
 	@echo 'Config targets:'
 	@echo '  menuconfig     - Config file'
-
-
 
 .PHONY: $(PHONY)
