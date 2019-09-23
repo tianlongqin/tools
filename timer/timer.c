@@ -37,7 +37,7 @@
  * long  tv_nsec // nanoseconds
  */
 
-int clk_nanosleep(time_t tv_sec, long tv_nsec)
+int Tclk_nanosleep(time_t tv_sec, long tv_nsec)
 {
 	int rc;
 	struct timespec time;

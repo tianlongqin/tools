@@ -2,21 +2,16 @@
 #include <signal.h>
 #include <timer.h>
 
-static void handler(int sig)
-{
-	printf("ctrl + C\n");
-}
-
 int main(int argc, const char *argv[])
 {
 	struct sigaction ac;
 
 	sigemptyset(&ac.sa_mask);
 	ac.sa_flags = 0;
-	ac.sa_handler = handler;
+	ac.sa_handler = SIG_IGN;
 	sigaction(SIGINT, &ac, NULL);
 
-	clk_nanosleep(10, 0);
+	Tclk_nanosleep(10, 0);
 	printf("1----------------------\n");
 
 	return 0;

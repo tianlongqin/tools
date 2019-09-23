@@ -34,7 +34,7 @@
 
 static int _shm_open(key_t key);
 
-int shm_open(const char *pathname, int proj_id, size_t size)
+int Tshm_open(const char *pathname, int proj_id, size_t size)
 {
 	int shmid, rc;
 	key_t key = ftok(pathname, proj_id);
@@ -69,7 +69,7 @@ err:
 	return -1;
 }
 
-void *shm_attach_ptr(int shmid)
+void *Tshm_attach_ptr(int shmid)
 {
 	void *ptr = shmat(shmid, NULL, 0);
 	if (ptr == (void *)-1)
@@ -78,7 +78,7 @@ void *shm_attach_ptr(int shmid)
 	return ptr;
 }
 
-int shm_attach_num(int shmid)
+int Tshm_attach_num(int shmid)
 {
 	int rc;
 	struct shmid_ds buf;
@@ -89,7 +89,7 @@ int shm_attach_num(int shmid)
 	return buf.shm_nattch;
 }
 
-int shm_destroy(int shmid)
+int Tshm_destroy(int shmid)
 {
 	return shmctl(shmid, IPC_RMID, 0);
 }

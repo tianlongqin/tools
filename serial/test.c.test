@@ -14,7 +14,7 @@ int main(int argc, const char *argv[])
 	char buf[64] = {0};
 	fd_set set;
 
-	fd = serial_open_with_arg("/dev/ttyUSB0", 1, 115200, 8, 1, 'N', 'n');
+	fd = Tserial_open_with_arg("/dev/ttyUSB0", 1, 115200, 8, 1, 'N', 'n');
 	if (fd < 0) {
 		printf("serial_open_with_arg faile\n");
 		exit(1);

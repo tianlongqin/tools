@@ -7,15 +7,15 @@ int main(int argc, const char *argv[])
 {
 	int semid;
 
-	semid = sem_open("/", 'a');
+	semid = Tsem_open("/", 'a');
 	if (semid < 0) {
 		printf("errno : %d\n", errno);
 		exit(1);
 	}
 
-	sem_lock(semid);
+	Tsem_lock(semid);
 	printf("hello world\n");
-	sem_unlock(semid);
+	Tsem_unlock(semid);
 
 	return 0;
 }

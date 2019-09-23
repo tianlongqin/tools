@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-void print_err(int line, const char *func, const char *szFormat, ...)
+void Tprint_err(int line, const char *func, const char *szFormat, ...)
 {
 	char pDate[512] = {0};
 	struct timeval start;
@@ -49,7 +49,7 @@ void print_err(int line, const char *func, const char *szFormat, ...)
 	printf("\033[31m%s\033[0m", pDate);
 }
 
-void print_info(int line, const char *func, const char *szFormat, ...)
+void Tprint_info(int line, const char *func, const char *szFormat, ...)
 {
 	char pDate[512] = {0};
 	struct timeval start;
@@ -64,7 +64,7 @@ void print_info(int line, const char *func, const char *szFormat, ...)
 	printf("%s", pDate);
 }
 
-void print_hex_dump(const char *prompt, const void *buffer, size_t size)
+void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
 {
 	int i, j, m;
 	int same;

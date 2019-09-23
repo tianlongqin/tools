@@ -15,31 +15,31 @@ int main(int argc, const char *argv[])
 
 	pid = fork();
 	if (pid > 0) {
-		shmid = shm_open("/", 'a', 100);
+		shmid = Tshm_open("/", 'a', 100);
 		if (shmid < 0) {
 			printf("errno: %d\n", errno);
 			goto out;
 		}
-		ptr = shm_attach_ptr(shmid);
+		ptr = Tshm_attach_ptr(shmid);
 		if (ptr == NULL)
 			goto out;
 
-		printf("attach num:%d\n", shm_attach_num(shmid));
+		printf("attach num:%d\n", Tshm_attach_num(shmid));
 		sleep(1);
 
 		memcpy(ptr, "hello world", 11);
 
 	} else if (pid == 0){
-		shmid = shm_open("/", 'a', 100);
+		shmid = Tshm_open("/", 'a', 100);
 		if (shmid < 0) {
 			printf("errno: %d\n", errno);
 			goto out;
 		}
-		ptr = shm_attach_ptr(shmid);
+		ptr = Tshm_attach_ptr(shmid);
 		if (ptr == NULL)
 			goto out;
 		sleep(1);
-		printf("attach num:%d\n", shm_attach_num(shmid));
+		printf("attach num:%d\n", Tshm_attach_num(shmid));
 
 		printf("%s\n", (char *)ptr);
 
@@ -50,6 +50,6 @@ int main(int argc, const char *argv[])
 out:
 	wait(&status);
 
-	shm_destroy(shmid);
+	Tshm_destroy(shmid);
 	return 0;
 }

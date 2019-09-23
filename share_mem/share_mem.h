@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-extern int shm_open(const char *pathname, int proj_id, size_t size);
-extern void *shm_attach_ptr(int shmid);
-extern int shm_attach_num(int shmid);
-extern int shm_destroy(int shmid);
+extern int Tshm_open(const char *pathname, int proj_id, size_t size);
+extern void *Tshm_attach_ptr(int shmid);
+extern int Tshm_attach_num(int shmid);
+extern int Tshm_destroy(int shmid);
 
 #ifdef __cplusplus
 }

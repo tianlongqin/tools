@@ -48,7 +48,7 @@ static struct sembuf const up = {0, 1, SEM_UNDO};
 static struct sembuf const down = {0, -1, SEM_UNDO};
 static int _sem_open(key_t key);
 
-int sem_open(const char *pathname, int proj_id)
+int Tsem_open(const char *pathname, int proj_id)
 {
 	int semid, rc;
 	union semun arg;
@@ -110,12 +110,12 @@ err:
 	return -1;
 }
 
-int sem_lock(int semid)
+int Tsem_lock(int semid)
 {
 	return semid == -1 ? -1 : semop(semid, (struct sembuf *)&down, 1);
 }
 
-int sem_unlock(int semid)
+int Tsem_unlock(int semid)
 {
 	return semid == -1 ? -1 : semop(semid, (struct sembuf *)&up, 1);
 }

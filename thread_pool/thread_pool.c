@@ -52,7 +52,7 @@ struct threadpool {
 static void *threadpool_thread(void *threadpool);
 static int threadpool_free(struct threadpool **__pool);
 
-int threadpool_create(void **__pool,
+int Tthreadpool_create(void **__pool,
 		      unsigned int max_thr_num,
 		      unsigned int queue_max_size)
 {
@@ -97,7 +97,7 @@ out:
 	return -1;
 }
 
-int threadpool_destroy(void *_pool)
+int Tthreadpool_destroy(void *_pool)
 {
 	int i;
 	struct threadpool *pool = _pool;
@@ -118,7 +118,7 @@ out:
 	return -1;
 }
 
-int threadpool_add_task(void *_pool, void *(*function)(void *arg), void *arg)
+int Tthreadpool_add_task(void *_pool, void *(*function)(void *arg), void *arg)
 {
 	unsigned int queue_front;
 	unsigned int queue_rear;

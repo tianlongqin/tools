@@ -3,8 +3,8 @@
 
 int main(int argc, const char *argv[])
 {
-	print_hex_dump_debug("hex:", "hello world", 11);
-	print_err_debug("hello world\n");
-	print_info_debug("hello world\n");
+	Tprint_hex_dump_debug("hex:", "hello world", 11);
+	Tprint_err_debug("hello world\n");
+	Tprint_info_debug("hello world\n");
 	return 0;
 }

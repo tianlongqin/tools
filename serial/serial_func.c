@@ -56,7 +56,7 @@ static const int name_arr[] = {
  * @param block isn't block
  * @return -e serial_open() return the new file descriptor, or -1 on error.
  */
-int serial_open(char *dev, char block)
+int Tserial_open(char *dev, char block)
 {
 	int fd, flags;
 
@@ -78,7 +78,7 @@ int serial_open(char *dev, char block)
  * @param speed serial speed
  * @return \e serial_set_speed return 0 on success, or -1 on error.
  */
-int serial_set_speed(int fd, int speed)
+int Tserial_set_speed(int fd, int speed)
 {
 	int i;
 	struct termios options;
@@ -108,7 +108,7 @@ int serial_set_speed(int fd, int speed)
  * @param parity parity mode
  * @return return 0 on success, or -1 on error.
  */
-int serial_set_parity(int fd, int databits, int stopbits, int parity, int flow)
+int Tserial_set_parity(int fd, int databits, int stopbits, int parity, int flow)
 {
 	struct termios options;
 
@@ -196,20 +196,20 @@ int serial_set_parity(int fd, int databits, int stopbits, int parity, int flow)
 	return 0;
 }
 
-int serial_open_with_arg(char *dev, char block, int speed, int databits,
+int Tserial_open_with_arg(char *dev, char block, int speed, int databits,
 		int stopbits, int parity, int flow)
 {
 	int fd, rc;
 
-	fd = serial_open(dev, block);
+	fd = Tserial_open(dev, block);
 	if (fd < 0)
 		return -1;
 
-	rc = serial_set_parity(fd, databits, stopbits, parity, flow);
+	rc = Tserial_set_parity(fd, databits, stopbits, parity, flow);
 	if (rc)
 		return -1;
 
-	rc = serial_set_speed(fd, speed);
+	rc = Tserial_set_speed(fd, speed);
 	if (rc)
 		return -1;
 

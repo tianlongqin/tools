@@ -12,14 +12,14 @@ extern "C" {
 	 * return value:
 	 * 	0为成功,小于0为失败.
 	 * */
-	int threadpool_create(void **__pool, unsigned int max_thr_num, unsigned int queue_max_size);
+	int Tthreadpool_create(void **__pool, unsigned int max_thr_num, unsigned int queue_max_size);
 	/* function:销毁线程池
 	 * value:
 	 * 	_pool:句柄参数
 	 * return value:
 	 * 	0为成功,小于0为失败.
 	 * */
-	int threadpool_destroy(void *_pool);
+	int Tthreadpool_destroy(void *_pool);
 
 	/* function:向线程池的任务队列中添加一个任务
 	 * value:
@@ -29,7 +29,7 @@ extern "C" {
 	 * return value:
 	 * 	0为成功,小于0为失败.
 	 * */
-	int threadpool_add_task(void *pool, void *(*function)(void *arg), void *arg);
+	int Tthreadpool_add_task(void *pool, void *(*function)(void *arg), void *arg);
 
 #ifdef __cplusplus
 }
