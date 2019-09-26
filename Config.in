@@ -39,3 +39,8 @@ config  SIGNAL
 bool    "signal tool, Be related to signal function"
 default  y
 help
+
+config	MATCH
+bool    "match algo tool, Be related to match algo function"
+default  y
+help

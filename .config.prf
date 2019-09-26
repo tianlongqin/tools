@@ -27,3 +27,7 @@ ifeq ($(CONFIG_SIGNAL),y)
 	dirs += signal 
 endif
 
+ifeq ($(CONFIG_MATCH),y)
+	dirs += match_algo
+endif
+

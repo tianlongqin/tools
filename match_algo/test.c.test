@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <match_algo.h>
+
+int main(int argc, const char *argv[])
+{
+	int pos, rc;
+	unsigned char *s = "所对应的主串参与匹配的最末位字符的下一位字符移动到该位，所需要的移动位数";
+	unsigned char *t = "字符";
+	unsigned char *r;
+	int next[1024] = {0};
+	void *h = Tmatch_new();
+
+	rc = Tmatch_algo_init(h, MATCH_ALGO_SUN, s, strlen(s), t, strlen(t));
+	if (rc) {
+		printf("Tmatch_algo_init failed\n");
+		exit(1);
+	}
+
+	if (r = Tmatch_algo(h, &pos)) {
+		printf("%s\n", r);
+		printf("%d\n", pos);
+	}
+
+	rc = Tmatch_algo_init(h, MATCH_ALGO_HP, s, strlen(s), t, strlen(t));
+	if (rc) {
+		printf("Tmatch_algo_init failed\n");
+		exit(1);
+	}
+
+	if (r = Tmatch_algo(h, &pos)) {
+		printf("%s\n", r);
+		printf("%d\n", pos);
+	}
+
+	rc = Tmatch_algo_init(h, MATCH_ALGO_STR, s, strlen(s), t, strlen(t));
+	if (rc) {
+		printf("Tmatch_algo_init failed\n");
+		exit(1);
+	}
+
+	if (r = Tmatch_algo(h, &pos)) {
+		printf("%s\n", r);
+		printf("%d\n", pos);
+	}
+
+/*
+	Tmatch_set_aux(h, next);
+	rc = Tmatch_algo_init(h, MATCH_ALGO_KMP, s, strlen(s), t, strlen(t));
+	if (rc) {
+		printf("Tmatch_algo_init failed\n");
+		exit(1);
+	}
+
+
+	if (r = Tmatch_algo(h, &pos)) {
+		printf("%s\n", r);
+		printf("%d\n", pos);
+	}
+*/
+
+	Tmatch_free(h);
+	return 0;
+}

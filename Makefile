@@ -27,16 +27,19 @@ all: so ar
 
 PHONY += so
 so: default
-	$(CC) -shared $(build_objs)  -o $(so_name) $(LIB)
-	mv $(so_name) $(build)
+	@$(CC) -shared $(build_objs)  -o $(so_name) $(LIB)
+	@echo "LD $(so_name)"
+	@mv $(so_name) $(build)
 
 PHONY += ar
 ar: default
-	$(AR) -crs $(ar_name) $(build_objs)
-	mv $(ar_name) $(build)
+	@$(AR) -crs $(ar_name) $(build_objs)
+	@echo "AR $(ar_name)"
+	@mv $(ar_name) $(build)
 
 %.o:%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDE)
+	@$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDE)
+	@echo "CC $<"
 
 PHONY += menuconfig
 menuconfig:
