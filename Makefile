@@ -1,11 +1,20 @@
 sinclude .config
-sinclude .config.prf
 CC              ?= $(CROSS_COMPILE)gcc
 STRIP           ?= $(CROSS_COMPILE)strip
 AR              ?= $(CROSS_COMPILE)ar
 LD              ?= $(CROSS_COMPILE)ld
 
-src := $(foreach dir,$(dirs),$(wildcard $(dir)/*.c))
+obj-$(CONFIG_DEBUG)		+= debug
+obj-$(CONFIG_FILE)		+= file
+obj-$(CONFIG_SEMAPHORE)		+= semaphore
+obj-$(CONFIG_SHAREMEM)		+= share_mem
+obj-$(CONFIG_THREADPOOL)	+= thread_pool
+obj-$(CONFIG_SERIAL)		+= serial
+obj-$(CONFIG_TIMER)		+= timer
+obj-$(CONFIG_SIGNAL)		+= signal
+obj-$(CONFIG_MATCH)		+= match_algo
+
+src := $(foreach dir,$(obj-y),$(wildcard $(dir)/*.c))
 obj := $(patsubst %.c, %.o, $(src))
 
 LIB = -lpthread
@@ -13,7 +22,7 @@ CFLAGS = -fPIC
 
 build = ./build
 build_objs = $(build)/*.o
-INCLUDE = $(addprefix -I, $(dirs))
+INCLUDE = $(addprefix -I, $(obj-y))
 
 so_name = libtool.so
 ar_name = libtool.a
