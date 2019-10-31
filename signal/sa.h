@@ -5,10 +5,11 @@
 extern "C" {
 #endif
 
-extern int block_sig(int sig);
-extern int unblock_sig(int sig);
-extern int block_all_sig(void);
-extern int unblock_all_sig(void);
+extern int sig_block(int sig);
+extern int sig_unblock(int sig);
+extern int sig_block_all(void);
+extern int sig_unblock_all(void);
+extern int sig_ignore(int sig);
 
 #ifdef __cplusplus
 }

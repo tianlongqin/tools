@@ -29,74 +29,82 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define rc_sig(fun) ({ \
-	rc = fun; \
-	if (rc < 0)  \
-		return rc; \
-})\
+#define RC_SIG(expression)		\
+   (__extension__			\
+	({long int __result; 		\
+	 __result  = (expression); 	\
+	 if (__result < 0)  		\
+		return __result;}))	\
 
-static inline int _block_sig(sigset_t *ss)
-{
-	return sigprocmask(SIG_BLOCK, ss, NULL);
-}
-
-static inline int _unblock_sig(sigset_t *ss)
-{
-	return sigprocmask(SIG_UNBLOCK, ss, NULL);
-}
+#define _sig_block(ss)		sigprocmask(SIG_BLOCK, ss, NULL)
+#define _sig_unblock(ss)	sigprocmask(SIG_UNBLOCK, ss, NULL)
 
 /*
  * block signal 
  */
-int block_sig(int sig)
+int Tsig_block(int sig)
 {
-	int rc;
 	sigset_t ss;
-	rc_sig(sigemptyset(&ss));
-	rc_sig(sigaddset(&ss, sig));
-	rc_sig(_block_sig(&ss));
+	RC_SIG(sigemptyset(&ss));
+	RC_SIG(sigaddset(&ss, sig));
+	RC_SIG(_sig_block(&ss));
 
-	return rc;
+	return 0;
 }
 
 /*
  * unblock signal
  */
-int unblock_sig(int sig)
+int Tsig_unblock(int sig)
 {
-	int rc;
 	sigset_t ss;
-	rc_sig(sigemptyset(&ss));
-	rc_sig(sigaddset(&ss, sig));
-	rc_sig(_unblock_sig(&ss));
+	RC_SIG(sigemptyset(&ss));
+	RC_SIG(sigaddset(&ss, sig));
+	RC_SIG(_sig_unblock(&ss));
 
-	return rc;
+	return 0;
 }
 
 /*
  * block all signal
  */
-int block_all_sig(void)
+int Tsig_block_all(void)
 {
-	int rc;
 	sigset_t ss;
 
-	rc_sig(sigfillset(&ss));
-	rc_sig(_block_sig(&ss));
+	RC_SIG(sigfillset(&ss));
+	RC_SIG(_sig_block(&ss));
 
-	return rc;
+	return 0;
 }
 
 /*
  * unblock all signal
  */
-int unblock_all_sig(void)
+int Tsig_unblock_all(void)
 {
-	int rc;
 	sigset_t ss;
 
-	rc_sig(sigemptyset(&ss));
-	rc_sig(_unblock_sig(&ss));
+	RC_SIG(sigemptyset(&ss));
+	RC_SIG(_sig_unblock(&ss));
 
-	return rc;
+	return 0;
+}
+
+static int _sig_def(int sig, void (*sig_handler) (int))
+{
+	struct sigaction sa;
+
+	sa.sa_handler = sig_handler;
+	sa.sa_flags = 0;
+	RC_SIG(sigemptyset(&sa.sa_mask));
+
+	RC_SIG(sigaction(sig, &sa, NULL));
+
+	return 0;
+}
+
+int Tsig_ignore(int sig)
+{
+	return (_sig_def(sig, SIG_IGN));
 }
