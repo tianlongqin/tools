@@ -53,3 +53,5 @@ dkms.conf
 
 .config
 .config.old
+zconf.*.c
+mconf
