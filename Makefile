@@ -4,6 +4,9 @@ STRIP           ?= $(CROSS_COMPILE)strip
 AR              ?= $(CROSS_COMPILE)ar
 LD              ?= $(CROSS_COMPILE)ld
 
+mconf		=$(CURDIR)/scripts/kconfig/mconf
+config		=$(CURDIR)/.config
+
 obj-$(CONFIG_DEBUG)		+= debug
 obj-$(CONFIG_FILE)		+= file
 obj-$(CONFIG_SEMAPHORE)		+= semaphore
@@ -51,8 +54,11 @@ ar: default
 	@echo "CC $<"
 
 PHONY += menuconfig
-menuconfig:
-	./scripts/mconf Config.in
+menuconfig: $(mconf)
+	$< Config.in
+
+$(mconf):
+	$(MAKE) -C $(CURDIR)/scripts/kconfig
 
 PHONY += clean
 clean:
@@ -61,6 +67,7 @@ clean:
 PHONY += mrproper
 mrproper:
 	rm -rf $(build) .config
+	$(MAKE) -C $(CURDIR)/scripts/kconfig clean
 
 PHONY += help
 help:
