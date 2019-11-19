@@ -40,5 +40,6 @@
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/make.png)
  * 使用strings build/libtool.so | grep CONFIG 可以查看配置。如图：
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/CONFIG1.png)
+ * tools_test路径：https://github.com/tianlongqin/tools_test.git
 ### 4、实现目标
 * 后续会添加更多的工具集合进来，期望更多的接口实现，便于项目使用。
