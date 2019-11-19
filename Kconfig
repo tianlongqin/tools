@@ -3,44 +3,35 @@ mainmenu "Configuration"
 config  DEBUG
 bool    "Debug tool, Be related to print debug"
 default  y
-help
 
 config  FILE
 bool    "File tool, Be related to file"
 default  y
-help
 
 config  SEMAPHORE
 bool    "Semaphore tool, Be related to system V sem function"
 default  y
-help
 
 config	SHAREMEM
 bool    "Share memory tool, Be related to system V share memory function"
 default  y
-help
 
 config  THREADPOOL
 bool    "Thread pool tool, Be related to thread pool"
 default  y
-help
 
 config  SERIAL
 bool    "serial port tool, Be related to serial port"
 default  y
-help
 
 config  TIMER
 bool    "time tool, Be related to time function"
 default  y
-help
 
 config  SIGNAL
 bool    "signal tool, Be related to signal function"
 default  y
-help
 
 config	MATCH
 bool    "match algo tool, Be related to match algo function"
 default  y
-help
