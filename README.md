@@ -18,10 +18,7 @@
 * 相关依赖ncursesw tinfo bison flex，所以需要安装sudo apt-get install libncurses5-dev libtinfo-dev bison flex。
 * 先进行make menuconfig 进行集合配置，之后make all生成动态库和静态库。
 ### 2、项目说明
-* 使用strings build/libtool.so | grep CONFIG 可以查看配置。如图：
-  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/CONFIG.png)
-* 添加make menuconfig，进行集合裁剪，自由配置需要使用的集合。如图：
- ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/menuconfig.png)
+* 添加make menuconfig，进行集合裁剪，自由配置需要使用的集合。
 * 添加make so和make ar，分别生成静态库和动态库。
 * 每个集合之间并没耦合，都可单独使用，根据需要选择集合编译进项目即可。
 * 接口复杂的集合，会有相应的test.c.test示例代码作为参考。
@@ -41,5 +38,7 @@
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/incldue.png)
 * 准备工作已经完成，可以使用tools接口，然后进行编译即可。如图：
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/make.png)
-### 3、实现目标
+ * 使用strings build/libtool.so | grep CONFIG 可以查看配置。如图：
+ ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/CONFIG1.png)
+### 4、实现目标
 * 后续会添加更多的工具集合进来，期望更多的接口实现，便于项目使用。
