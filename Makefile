@@ -85,7 +85,7 @@ clean:
 
 PHONY += mrproper
 mrproper:
-	@rm -rf $(build) .config include
+	@rm -rf $(build) .config include/config include/generated
 	@$(MAKE) -C $(CURDIR)/scripts/kconfig clean
 
 PHONY += help
