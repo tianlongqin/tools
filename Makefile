@@ -1,11 +1,13 @@
 sinclude .config
-CC              ?= $(CROSS_COMPILE)gcc
-STRIP           ?= $(CROSS_COMPILE)strip
-AR              ?= $(CROSS_COMPILE)ar
-LD              ?= $(CROSS_COMPILE)ld
 
-mconf		=$(CURDIR)/scripts/kconfig/mconf
-config		=$(CURDIR)/.config
+KCONFIG_CONFIG  ?= .config
+TOPDIR		= $(shell pwd)
+export TOPDIR
+
+mconf		= $(CURDIR)/scripts/kconfig/mconf
+conf		= $(CURDIR)/scripts/kconfig/conf
+config		= $(CURDIR)/.config
+CONFIG		= $(CURDIR)/config.c
 
 obj-$(CONFIG_DEBUG)		+= debug
 obj-$(CONFIG_FILE)		+= file
@@ -17,22 +19,35 @@ obj-$(CONFIG_TIMER)		+= timer
 obj-$(CONFIG_SIGNAL)		+= signal
 obj-$(CONFIG_MATCH)		+= match_algo
 
-src := $(foreach dir,$(obj-y),$(wildcard $(dir)/*.c))
-obj := $(patsubst %.c, %.o, $(src))
+src = $(foreach dir, $(obj-y), $(wildcard $(dir)/*.c))
+obj = $(patsubst %.c, %.o, $(src)) config.o
 
 LIB = -lpthread
+
 CFLAGS = -fPIC
+INCLUDE = $(addprefix -I, $(obj-y)) -I$(TOPDIR)
 
 build = ./build
 build_objs = $(build)/*.o
-INCLUDE = $(addprefix -I, $(obj-y))
 
 so_name = libtool.so
 ar_name = libtool.a
 
+define create_config
+	@echo "#include <stdio.h>"	> $@
+	@echo "void config(void) {" >> $@
+	@cat .config |grep -v "#"| awk '{print "printf(\"" $$1 "\");"}' >> $@
+	@echo "}" >> $@
+endef
+
 PHONY += default
-default: $(obj)
-	@mkdir -p build && mv $^ $(build)
+default: $(obj) sysconfig
+	@mkdir -p build && mv $(obj) $(build)
+
+$(obj): $(CONFIG)
+
+$(CONFIG)::
+	$(call create_config)
 
 PHONY += all
 all: so ar
@@ -49,25 +64,29 @@ ar: default
 	@echo "AR $(ar_name)"
 	@mv $(ar_name) $(build)
 
-%.o:%.c
+$(obj):%.o:%.c
 	@$(CC) $(CFLAGS) -c $< -o $@ $(INCLUDE)
 	@echo "CC $<"
 
 PHONY += menuconfig
 menuconfig: $(mconf)
-	$< Config.in
+	@$< Kconfig
 
 $(mconf):
-	$(MAKE) -C $(CURDIR)/scripts/kconfig
+	$(MAKE) -C $(CURDIR)/scripts/kconfig all
+
+sysconfig: $(conf) $(KCONFIG_CONFIG)
+	@mkdir -p include/config include/generated
+	@$< --syncconfig Kconfig
 
 PHONY += clean
 clean:
-	rm -rf $(build)
+	@rm -rf $(build) $(obj) $(CONFIG)
 
 PHONY += mrproper
 mrproper:
-	rm -rf $(build) .config
-	$(MAKE) -C $(CURDIR)/scripts/kconfig clean
+	@rm -rf $(build) .config include
+	@$(MAKE) -C $(CURDIR)/scripts/kconfig clean
 
 PHONY += help
 help:
