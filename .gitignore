@@ -58,3 +58,4 @@ mconf
 config.c
 include/generated/
 include/config/
+a.out
