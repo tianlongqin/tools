@@ -3,6 +3,11 @@ mainmenu "Configuration"
 config  DEBUG
 bool    "Debug tool, Be related to print debug"
 default  y
+	config ENV
+	bool "Open environment control"
+	depends on DEBUG
+	default n
+
 
 config  FILE
 bool    "File tool, Be related to file"

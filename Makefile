@@ -25,7 +25,7 @@ obj = $(patsubst %.c, %.o, $(src)) config.o
 LIB = -lpthread
 
 CFLAGS = -fPIC
-INCLUDE = $(addprefix -I, $(obj-y)) -I$(TOPDIR)
+INCLUDE = $(addprefix -I, $(obj-y)) -I$(TOPDIR) -I$(TOPDIR)/include
 
 build = ./build
 build_objs = $(build)/*.o
@@ -71,6 +71,8 @@ $(obj):%.o:%.c
 PHONY += menuconfig
 menuconfig: $(mconf)
 	@$< Kconfig
+	@mkdir -p include/config include/generated
+	@$(conf) --syncconfig Kconfig
 
 $(mconf):
 	$(MAKE) -C $(CURDIR)/scripts/kconfig all

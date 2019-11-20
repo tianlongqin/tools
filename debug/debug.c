@@ -33,26 +33,48 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <debug.h>
+#include <generated/autoconf.h>
 
-void Tprint_err(int line, const char *func, const char *szFormat, ...)
+enum {
+	TDEBUG_LEVEL1,
+	TDEBUG_LEVEL2,
+	TDEBUG_LEVEL3,
+};
+
+#ifdef CONFIG_ENV
+#define ENV_DEBUG(l) 					\
+	char *level = getenv("TDEBUG");			\
+	if (level && (Thex_to_bin(level[0]) > l)) 	\
+			return ;
+#else
+#define ENV_DEBUG(l)
+#endif
+
+void Tprint_debug(const char *szFormat, ...)
 {
 	char pDate[512] = {0};
-	struct timeval start;
-	gettimeofday(&start, NULL);
-	sprintf(pDate, "ERR->[%ld:%ld] [%d-%ld] [%s-%s:(%d)]:",
-			start.tv_sec, start.tv_usec, getpid(), pthread_self(), __FILE__, func, line);
+
+	ENV_DEBUG(TDEBUG_LEVEL1);
+
 	va_list valist;
 	va_start(valist, szFormat);
 	vsnprintf(pDate + strlen(pDate), 512 - strlen(pDate), szFormat, valist);
 	va_end(valist);
 
-	printf("\033[31m%s\033[0m", pDate);
+	printf("%s", pDate);
 }
 
 void Tprint_info(int line, const char *func, const char *szFormat, ...)
 {
 	char pDate[512] = {0};
 	struct timeval start;
+
+	ENV_DEBUG(TDEBUG_LEVEL2);
+
 	gettimeofday(&start, NULL);
 	sprintf(pDate, "INFO->[%ld:%ld] [%d-%ld] [%s-%s:(%d)]:",
 			start.tv_sec, start.tv_usec, getpid(), pthread_self(), __FILE__, func, line);
@@ -64,11 +86,31 @@ void Tprint_info(int line, const char *func, const char *szFormat, ...)
 	printf("%s", pDate);
 }
 
+void Tprint_err(int line, const char *func, const char *szFormat, ...)
+{
+	char pDate[512] = {0};
+	struct timeval start;
+
+	ENV_DEBUG(TDEBUG_LEVEL3);
+
+	gettimeofday(&start, NULL);
+	sprintf(pDate, "ERR->[%ld:%ld] [%d-%ld] [%s-%s:(%d)]:",
+			start.tv_sec, start.tv_usec, getpid(), pthread_self(), __FILE__, func, line);
+	va_list valist;
+	va_start(valist, szFormat);
+	vsnprintf(pDate + strlen(pDate), 512 - strlen(pDate), szFormat, valist);
+	va_end(valist);
+
+	printf("\033[31m%s\033[0m", pDate);
+}
+
 void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
 {
 	int i, j, m;
 	int same;
 	const uint8_t *c;
+
+	ENV_DEBUG(TDEBUG_LEVEL1);
 
 	for (i = 0, c = buffer, same = 0; ; i += j) {
 		if (i >= size)
@@ -112,4 +154,43 @@ void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
 		printf("%s%08x\n", prompt, i);
 	else
 		printf("%08x\n", i);
+}
+
+/**
+ * Thex_to_bin - convert a hex digit to its real value
+ * @ch: ascii character represents hex digit
+ *
+ * Thex_to_bin() converts one hex digit to its actual value or -1 in case of bad
+ * input.
+ **/
+int Thex_to_bin(char ch)
+{
+	if ((ch >= '0') && (ch <= '9'))
+		return ch - '0';
+	ch = tolower(ch);
+	if ((ch >= 'a') && (ch <= 'f'))
+		return ch - 'a' + 10;
+	return -1;
+}
+
+/**
+ * Thex2bin - convert an ascii hexadecimal string to its binary representation
+ * @dst: binary result
+ * @src: ascii hexadecimal string
+ * @count: result length
+ *
+ * Return 0 on success, -EINVAL in case of bad input.
+ */
+int Thex2bin(unsigned char *dst, const char *src, size_t count)
+{
+	while (count--) {
+		int hi = Thex_to_bin(*src++);
+		int lo = Thex_to_bin(*src++);
+
+		if ((hi < 0) || (lo < 0))
+			return -EINVAL;
+
+		*dst++ = (hi << 4) | lo;
+	}
+	return 0;
 }
