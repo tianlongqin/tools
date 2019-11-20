@@ -13,7 +13,10 @@
 extern "C" {
 #endif
 
-extern int Tfile_check_type(int fd, int type);// Determine whether the file type is fifo
+extern int Tfile_check_type_fd(int fd, int type);
+extern int Tfile_check_type_name(const char *name, int type);
+extern int Tfile_get_size_fd(int fd);
+extern int Tfile_get_size_name(const char *name);
 
 #ifdef __cplusplus 
 }

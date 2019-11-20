@@ -30,8 +30,16 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <fcntl.h>
 
-int Tfile_check_type(int fd, int type)
+
+/*
+ * Tfile_check_type_fd - check file type 
+ * @fd: file descriptor 
+ *
+ * On success, type is returned.  On error, -1 is returned, and errno is set appropriately.
+ */
+int Tfile_check_type_fd(int fd, int type)
 {
 	struct stat stat;
 
@@ -41,4 +49,57 @@ int Tfile_check_type(int fd, int type)
 	}
 
 	return stat.st_mode & type;
+}
+
+/*
+ * Tfile_check_type_name - check file type 
+ * @fd: file descriptor 
+ *
+ * On success, type is returned.  On error, -1 is returned, and errno is set appropriately.
+ */
+int Tfile_check_type_name(const char *name, int type)
+{
+	struct stat st;
+
+	if (stat(name, &st) < 0) {
+		perror("fstat error:");
+		return -1;
+	}
+
+	return st.st_mode & type;
+}
+
+/*
+ * Tfile_get_size_fd - get file tatol size 
+ * @fd: file descriptor 
+ *
+ * On success, size is returned.  On error, -1 is returned, and errno is set appropriately.
+ */
+int Tfile_get_size_fd(int fd)
+{
+	struct stat stat;
+
+	if (fstat(fd, &stat) < 0) {
+		perror("fstat error:");
+		return -1;
+	}
+	
+	return stat.st_size;
+}
+
+/*
+ * Tfile_get_size_name - get file tatol size 
+ * @name: file name
+ *
+ * On success, size is returned.  On error, -1 is returned, and errno is set appropriately.
+ */
+int Tfile_get_size_name(const char *name)
+{
+	struct stat st;
+	if (stat(name, &st) < 0) {
+		perror("fstat error:");
+		return -1;
+	}
+
+	return st.st_size;
 }
