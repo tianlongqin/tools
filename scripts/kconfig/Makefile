@@ -1,15 +1,9 @@
 # We need this, in case the user has it in its environment
 CC		= gcc
-STRIP		= strip
-IDIR		= /usr/include/ncursesw
-LIBS		= ncursesw tinfo
-DEFS		= CURSES_LOC="<curses.h>"
-
-CFLAGS		= $(addprefix -I, $(IDIR))
-CFLAGS		+= $(addprefix -D, $(DEFS))
-CFLAGS		+= $(addprefix -D, $(DEFS))
-
-LDFLAGS		:= $(addprefix -l, $(LIBS))
+check-lxdialog  = ./lxdialog/check-lxdialog.sh
+LIBS		= $(shell $(check-lxdialog) -ldflags)
+CFLAGS		= $(shell $(check-lxdialog) -ccflags)
+check_ncursesw	= $(shell $(check-lxdialog) -check $(CC) $(CFLAGS) )
 
 # ===========================================================================
 # Shared Makefile for the various kconfig executables:
@@ -34,26 +28,44 @@ target		+= zconf.lex.c
 clean-files	:= zconf.tab.c zconf.lex.c zconf.hash.c $(conf-objs) $(mconf-objs)
 target = conf mconf
 
+check = $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH))))
+
+all: check conf mconf
+
+PHONY = check all clean
+check:
+ifneq ($(check_ncursesw),)
+	@echo $(check_ncursesw)
+endif
 conf: conf.o zconf.tab.o
-	@$(CC)  $^ -o $@
+	@$(CC) $^ -o $@
 	@echo "   LD     $@"
 
 mconf: $(mconf-objs)
-	@$(CC)  $^ -o $@ $(LDFLAGS)
+	@$(CC) $^ -o $@ $(LIBS)
 	@echo "   LD     $@"
 
 zconf.tab.o: zconf.lex.c
 
 zconf.tab.c: zconf.y
+ifneq ($(call check,bison),)
 	@bison -o $@ -t -l $< && echo "   YACC   $@"
+else
+	@echo "Not find bison, please install bison!"
+endif
 
 zconf.lex.c: zconf.l
+ifneq ($(call check,flex),)
 	@flex -o $@ -L $< && echo "   LEX    $@"
+else
+	@echo "Not find flex, please install flex!"
+endif
 
 %.o : %.c
 	@$(CC) $(CFLAGS) -c $< -o $@ && echo "   CC     $@"
 
-all: conf mconf
 
 clean:
 	@rm -f $(objs) $(target) $(clean-files)
+
+.PHONY:$(PHONY)
