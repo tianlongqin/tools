@@ -56,3 +56,5 @@ dkms.conf
 zconf.*.c
 mconf
 config.c
+include/generated/
+include/config/
