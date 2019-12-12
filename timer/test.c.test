@@ -1,18 +1,45 @@
 #include <stdio.h>
-#include <signal.h>
 #include <timer.h>
+#include <unistd.h>
+
+void *test(void *args)
+{
+	printf("hello test\n");
+}
+
+void *test1(void *args)
+{
+	printf("hello test1\n");
+}
 
 int main(int argc, const char *argv[])
 {
-	struct sigaction ac;
+	int rc;
+	void *timer;
+	void *timer1;
+	struct clk_event event;
 
-	sigemptyset(&ac.sa_mask);
-	ac.sa_flags = 0;
-	ac.sa_handler = SIG_IGN;
-	sigaction(SIGINT, &ac, NULL);
+	Tclk_init();
 
-	Tclk_nanosleep(10, 0);
-	printf("1----------------------\n");
+	event.handle = test;
+	event.args = NULL;
+	event.interval.tv_sec = 1;
+	event.interval.tv_nsec = 0;
+
+	rc = Tclk_new(&timer, &event);
+	event.handle = test1;
+	event.args = NULL;
+	event.interval.tv_sec = 2;
+	event.interval.tv_nsec = 0;
+	rc = Tclk_new(&timer1, &event);
+
+	sleep(5);
+	Tclk_del(&timer);
+
+	sleep(5);
+	Tclk_del(&timer1);
+
+	Tclk_exit();
 
 	return 0;
 }
