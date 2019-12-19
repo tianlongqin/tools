@@ -29,6 +29,11 @@
 #define __TATOMIC_HH_19910612
 
 #include <stdint.h>
+
+#define GCC_VERSION (__GNUC__ * 10000 \
+		                   + __GNUC_MINOR__ * 100 \
+		                   + __GNUC_PATCHLEVEL__)
+
 typedef uint8_t		Tatomic_u8;
 typedef uint16_t	Tatomic_u16;
 typedef uint32_t	Tatomic_u32;
@@ -41,38 +46,70 @@ typedef int64_t		Tatomic_64;
 
 #define CHECK_ZERO(e)    (sizeof(struct{int:-!(e);}))
 
-#ifdef __GNUC__
-#define Tatomic_addf(p, value) __atomic_add_fetch(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_fadd(p, value) __atomic_fetch_add(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#if GCC_VERSION > 40200 && GCC_VERSION < 40700
 
-#define Tatomic_subf(p, value) __atomic_sub_fetch(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_fsub(p, value) __atomic_fetch_sub(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#define Tatomic_addf(p, value)		__atomic_add_fetch(p, value) + CHECK_ZERO(p)
+#define Tatomic_fadd(p, value)		__atomic_fetch_add(p, value) + CHECK_ZERO(p)
 
-#define Tatomic_andf(p, value) __atomic_and_fetch(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_fand(p, value) __atomic_fetch_and(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#define Tatomic_subf(p, value)		__atomic_sub_fetch(p, value) + CHECK_ZERO(p)
+#define Tatomic_fsub(p, value)		__atomic_fetch_sub(p, value) + CHECK_ZERO(p)
 
-#define Tatomic_orf(p, value) __atomic_or_fetch(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_for(p, value) __atomic_fetch_or(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#define Tatomic_andf(p, value)		__atomic_and_fetch(p, value) + CHECK_ZERO(p)
+#define Tatomic_fand(p, value)		__atomic_fetch_and(p, value) + CHECK_ZERO(p)
 
-#define Tatomic_xorf(p, value) __atomic_xor_fetch(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_fxor(p, value) __atomic_fetch_xor(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#define Tatomic_orf(p, value)		__atomic_or_fetch(p, value) + CHECK_ZERO(p)
+#define Tatomic_for(p, value)		__atomic_fetch_or(p, value) + CHECK_ZERO(p)
 
-#define Tatomic_nandf(p, value) __atomic_nand_fetch(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_fnand(p, value) __atomic_fetch_nand(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#define Tatomic_xorf(p, value)		__atomic_xor_fetch(p, value) + CHECK_ZERO(p)
+#define Tatomic_fxor(p, value)		__atomic_fetch_xor(p, value) + CHECK_ZERO(p)
 
-#define Tatomic_loadn(p)	__atomic_load_n(p, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_load(p, ret)\
-	__atomic_load_n(p, ret, __ATOMIC_SEQ_CST) + CHECK_ZERO(p) + CHECK_ZERO(ret)
+#define Tatomic_nandf(p, value)		__atomic_nand_fetch(p, value) + CHECK_ZERO(p)
+#define Tatomic_fnand(p, value)		__atomic_fetch_nand(p, value) + CHECK_ZERO(p)
 
-#define Tatomic_storen(p)	__atomic_store_n(p, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
-#define Tatomic_store(p, value)	\
-	__atomic_store_n(p, value, __ATOMIC_SEQ_CST) + CHECK_ZERO(p) + CHECK_ZERO(value)
+#define Tatomic_loadn(p)		__atomic_load_n(p) + CHECK_ZERO(p)
+#define Tatomic_load(p, ret)		__atomic_load_n(p, ret) + CHECK_ZERO(p) + CHECK_ZERO(ret)
 
-#define Tatomic_exchangen(p)	__atomic_exchange_n(p, __ATOMIC_SEQ_CST) + CHECK_ZERO(p)
+#define Tatomic_storen(p)		__atomic_store_n(p) + CHECK_ZERO(p)
+#define Tatomic_store(p, value)		__atomic_store_n(p, value) + CHECK_ZERO(p) + CHECK_ZERO(value)
+
+#define Tatomic_exchangen(p) 		__atomic_exchange_n(p) + CHECK_ZERO(p)
 #define Tatomic_exchange(p, value, ret)	\
-	__atomic_exchange_n(p, __ATOMIC_SEQ_CST) + CHECK_ZERO(p) + CHECK_ZERO(value) + CHECK_ZERO(ret)
+	__atomic_exchange_n(p) + CHECK_ZERO(p) + CHECK_ZERO(value) + CHECK_ZERO(ret)
+
+#elif GCC_VERSION >= 40700
+
+#define MEMTYPE __ATOMIC_SEQ_CST
+#define Tatomic_addf(p, value) 		__atomic_add_fetch(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_fadd(p, value) 		__atomic_fetch_add(p, value, MEMTYPE) + CHECK_ZERO(p)
+
+#define Tatomic_subf(p, value) 		__atomic_sub_fetch(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_fsub(p, value) 		__atomic_fetch_sub(p, value, MEMTYPE) + CHECK_ZERO(p)
+
+#define Tatomic_andf(p, value) 		__atomic_and_fetch(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_fand(p, value) 		__atomic_fetch_and(p, value, MEMTYPE) + CHECK_ZERO(p)
+
+#define Tatomic_orf(p, value) 		__atomic_or_fetch(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_for(p, value) 		__atomic_fetch_or(p, value, MEMTYPE) + CHECK_ZERO(p)
+
+#define Tatomic_xorf(p, value) 		__atomic_xor_fetch(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_fxor(p, value) 		__atomic_fetch_xor(p, value, MEMTYPE) + CHECK_ZERO(p)
+
+#define Tatomic_nandf(p, value) 	__atomic_nand_fetch(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_fnand(p, value) 	__atomic_fetch_nand(p, value, MEMTYPE) + CHECK_ZERO(p)
+
+#define Tatomic_loadn(p)		__atomic_load_n(p, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_load(p, ret)\
+	__atomic_load_n(p, ret, MEMTYPE) + CHECK_ZERO(p) + CHECK_ZERO(ret)
+
+#define Tatomic_storen(p)	__atomic_store_n(p, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_store(p, value)	\
+	__atomic_store_n(p, value, MEMTYPE) + CHECK_ZERO(p) + CHECK_ZERO(value)
+
+#define Tatomic_exchangen(p)	__atomic_exchange_n(p, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_exchange(p, value, ret)	\
+	__atomic_exchange_n(p, MEMTYPE) + CHECK_ZERO(p) + CHECK_ZERO(value) + CHECK_ZERO(ret)
 #else
-#error "Atomic operations are not supported. Please use the gcc !"
+#error "Atomic operations are not supported. Please check the gcc version!"
 #endif
 
 #endif
