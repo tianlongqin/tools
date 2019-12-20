@@ -67,14 +67,13 @@ typedef int64_t		Tatomic_64;
 #define Tatomic_fnand(p, value)		__atomic_fetch_nand(p, value) + CHECK_ZERO(p)
 
 #define Tatomic_loadn(p)		__atomic_load_n(p) + CHECK_ZERO(p)
-#define Tatomic_load(p, ret)		__atomic_load_n(p, ret) + CHECK_ZERO(p) + CHECK_ZERO(ret)
+#define Tatomic_load(p, ret)		__atomic_load(p, ret)
 
-#define Tatomic_storen(p)		__atomic_store_n(p) + CHECK_ZERO(p)
-#define Tatomic_store(p, value)		__atomic_store_n(p, value) + CHECK_ZERO(p) + CHECK_ZERO(value)
+#define Tatomic_storen(p, vaule)	__atomic_store_n(p, value)
+#define Tatomic_store(p, value)		__atomic_store(p, value)
 
-#define Tatomic_exchangen(p) 		__atomic_exchange_n(p) + CHECK_ZERO(p)
-#define Tatomic_exchange(p, value, ret)	\
-	__atomic_exchange_n(p) + CHECK_ZERO(p) + CHECK_ZERO(value) + CHECK_ZERO(ret)
+#define Tatomic_exchangen(p, value) 	__atomic_exchange_n(p, value) + CHECK_ZERO(p)
+#define Tatomic_exchange(p, value, ret)	__atomic_exchange(p)
 
 #elif GCC_VERSION >= 40700
 
@@ -98,16 +97,13 @@ typedef int64_t		Tatomic_64;
 #define Tatomic_fnand(p, value) 	__atomic_fetch_nand(p, value, MEMTYPE) + CHECK_ZERO(p)
 
 #define Tatomic_loadn(p)		__atomic_load_n(p, MEMTYPE) + CHECK_ZERO(p)
-#define Tatomic_load(p, ret)\
-	__atomic_load_n(p, ret, MEMTYPE) + CHECK_ZERO(p) + CHECK_ZERO(ret)
+#define Tatomic_load(p, ret) 		__atomic_load(p, ret, MEMTYPE)
 
-#define Tatomic_storen(p)	__atomic_store_n(p, MEMTYPE) + CHECK_ZERO(p)
-#define Tatomic_store(p, value)	\
-	__atomic_store_n(p, value, MEMTYPE) + CHECK_ZERO(p) + CHECK_ZERO(value)
+#define Tatomic_storen(p, value)	__atomic_store_n(p, value, MEMTYPE)
+#define Tatomic_store(p, value)		__atomic_store(p, value, MEMTYPE)
 
-#define Tatomic_exchangen(p)	__atomic_exchange_n(p, MEMTYPE) + CHECK_ZERO(p)
-#define Tatomic_exchange(p, value, ret)	\
-	__atomic_exchange_n(p, MEMTYPE) + CHECK_ZERO(p) + CHECK_ZERO(value) + CHECK_ZERO(ret)
+#define Tatomic_exchangen(p, value)	__atomic_exchange_n(p, value, MEMTYPE) + CHECK_ZERO(p)
+#define Tatomic_exchange(p, value, ret)	__atomic_exchange(p, value, ret, MEMTYPE)
 #else
 #error "Atomic operations are not supported. Please check the gcc version!"
 #endif
