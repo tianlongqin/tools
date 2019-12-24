@@ -308,3 +308,25 @@ inline void Tmatch_set_aux(void *h, int *aux)
 	struct match_algo *m = h;
 	m->para.data.paux2 = aux;
 }
+
+unsigned char *Tmatch_sun(unsigned char *s, size_t s_l, unsigned char *t, size_t t_l)
+{
+	int i, pos = 0;
+	char aux[256];
+	memset(aux, t_l + 1, 256);
+
+	for(i = 0; i < t_l; i++)
+		aux[t[i]] = t_l - i;
+
+	while (pos <= s_l - t_l) {
+		for (i = 0; s[pos + i] == t[i] && i < t_l; i++);
+
+		if (__builtin_expect(i == t_l, 0)) {
+			return s + pos;
+		}
+
+		pos += aux[s[pos + t_l]];
+	}
+
+	return NULL;
+}

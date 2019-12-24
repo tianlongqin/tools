@@ -17,6 +17,7 @@ extern void Tmatch_set_aux(void *h, int *aux);
 extern int Tmatch_algo_init(void *h, int algo, char *s, size_t s_l, char *t, size_t t_l);
 extern unsigned char *Tmatch_algo(void *h, int *ppos);
 
+extern unsigned char *Tmatch_sun(unsigned char *s, size_t s_l, unsigned char *t, size_t t_l);
 #ifdef __cplusplus
 }
 #endif
