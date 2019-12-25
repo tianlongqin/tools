@@ -40,3 +40,7 @@ default  y
 config	MATCH
 bool    "match algo tool, Be related to match algo function"
 default  y
+
+config	HASHMAP
+bool    "hash map"
+default  y

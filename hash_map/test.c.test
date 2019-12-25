@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <string.h>
+#include <hash_map.h>
+
+int main(int argc, const char *argv[])
+{
+	int rc;
+	void *phmap;
+	char value[16] = {"hello world\0"};
+	char value1[16] = {"hello world1\0"};
+	char *key = "123456789";
+	char *key1 = "1234567801231231";
+	size_t key_l = strlen(key);
+	size_t key1_l = strlen(key1);
+	char *pvalue;
+
+	rc = Thmap_create(&phmap, 1024);
+	if (rc < 0) {
+		printf("Thmap_create failed\n");
+		return 1;
+	}
+
+	rc = Thmap_insert(phmap, key, key_l, value);
+	if (rc < 0) {
+		printf("Thmap_insert failed\n");
+	}
+
+	rc = Thmap_insert(phmap, key1, key1_l, value1);
+	if (rc < 0)
+		printf("Thmap_insert failed\n");
+	
+	printf("size:%d\n", Thmap_get_node_size(phmap));
+
+	pvalue = Thmap_search(phmap, key, key_l);
+	if (pvalue)
+		printf("%s\n", pvalue);
+
+	pvalue = Thmap_search(phmap, key1, key1_l);
+	if (pvalue)
+		printf("%s\n", pvalue);
+
+	rc = Thmap_delete(phmap, key, key_l);
+	if (rc < 0) {
+		printf("Thmap_delete failed\n");
+	}
+
+	rc = Thmap_delete(phmap, key1, key1_l);
+	if (rc < 0) {
+		printf("Thmap_delete failed\n");
+	}
+
+	printf("size:%d\n", Thmap_get_node_size(phmap));
+	Thmap_destroy(&phmap);
+	return 0;
+}
