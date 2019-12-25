@@ -85,6 +85,7 @@ int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value)
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
 	struct hnode *phnode = NULL;
+	struct hnode *tmp = NULL;
 	uint32_t uikey;
 
 	if (!phmap || !key || !value || !key_l)
@@ -97,6 +98,13 @@ int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value)
 	md5(key, key_l, phnode->hkey);
 	memcpy((void *)&uikey, (void *)phnode->hkey, 4);
 	first = HMAP_GET_FIRST(phmap, uikey);
+
+	list_for_each_entry(tmp, first, node) {
+		if (!memcmp(tmp->hkey, phnode->hkey, 16)) {
+			phnode->value = value;
+			return 0;
+		}
+	}
 
 	phnode->value = value;
 	list_add_tail(&phnode->node, first);
