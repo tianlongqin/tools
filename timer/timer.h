@@ -3,6 +3,7 @@
 #include <time.h>
 
 struct clk_event {
+	struct timespec start;
 	struct timespec interval;
 	void *(*handle)(void *);
 	void *args;

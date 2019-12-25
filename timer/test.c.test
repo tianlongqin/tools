@@ -23,12 +23,16 @@ int main(int argc, const char *argv[])
 
 	event.handle = test;
 	event.args = NULL;
-	event.interval.tv_sec = 1;
+	event.start.tv_sec = 3;
+	event.start.tv_nsec = 0;
+	event.interval.tv_sec = 0;
 	event.interval.tv_nsec = 0;
 
 	rc = Tclk_new(&timer, &event);
 	event.handle = test1;
 	event.args = NULL;
+	event.start.tv_sec = 0;
+	event.start.tv_nsec = 0;
 	event.interval.tv_sec = 2;
 	event.interval.tv_nsec = 0;
 	rc = Tclk_new(&timer1, &event);

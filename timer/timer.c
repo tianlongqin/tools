@@ -95,8 +95,6 @@ int Tclk_nanosleep(time_t tv_sec, long tv_nsec)
 	return rc;
 }
 
-
-
 static int clk_new(void *timer, struct clk_event *event)
 {
 	int ret;
@@ -114,8 +112,8 @@ static int clk_new(void *timer, struct clk_event *event)
 		return -1;
 	}
 
-	new_value.it_value.tv_sec = 0; //第一次到期的时间
-	new_value.it_value.tv_nsec = now.tv_nsec;
+	new_value.it_value.tv_sec = event->start.tv_sec; //第一次到期的时间
+	new_value.it_value.tv_nsec = event->start.tv_nsec + now.tv_nsec;
 
 	new_value.it_interval.tv_sec = event->interval.tv_sec;      //之后每次到期的时间间隔
 	new_value.it_interval.tv_nsec = event->interval.tv_nsec;
