@@ -140,6 +140,35 @@ int Thmap_delete(void *_phmap, void *key, size_t key_l)
 	return 0;
 }
 
+void *Thmap_delete_search(void *_phmap, void *key, size_t key_l)
+{
+	struct hmap *phmap = _phmap;
+	struct list_head *first = NULL;
+	struct hnode *phnode = NULL;
+	uint32_t uikey;
+	char hkey[16];
+	void *value;
+
+	if (!phmap || !key)
+		return NULL;
+
+	md5(key, key_l, hkey);
+	memcpy((void *)&uikey, (void *)hkey, 4);
+	first = HMAP_GET_FIRST(phmap, uikey);
+
+	list_for_each_entry(phnode, first, node) {
+		if (!memcmp(phnode->hkey, hkey, 16)) {
+			list_del(&phnode->node);
+			value = phnode->value;
+			free(phnode);
+			Tatomic_subf(&(phmap->node_size), 1);
+			return value;
+		}
+	}
+
+	return NULL;
+}
+
 void *Thmap_search(void *_phmap, void *key, size_t key_l)
 {
 	struct hmap *phmap = _phmap;
