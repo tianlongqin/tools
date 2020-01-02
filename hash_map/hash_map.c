@@ -31,9 +31,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <generated/autoconf.h>
 #include <list.h>
 #include <hash_map.h>
+#ifdef CONFIG_MD5
 #include <md5.h>
+#endif
 
 struct hmap {
 	struct list_head *first;
@@ -47,7 +50,16 @@ struct hnode {
 	void *value;
 };
 
-#define HMAP_GET_FIRST(phmap, uikey)  (&(phmap->first[uikey % phmap->size]))
+#ifdef CONFIG_MD5
+#define HMAP_GET_FIRST(phmap, key, key_l, hkey)	({\
+	md5(key, key_l, hkey);					\
+	(&(phmap->first[(*(uint32_t *)hkey) % phmap->size]));	\
+})
+#else
+#error "please select digest algorithm"
+#endif
+
+#define KEY_CMP(key1, key2, len)	memcmp(key1, key2, len)
 
 int Thmap_create(void **pphmap, size_t size)
 {
@@ -80,33 +92,32 @@ void Thmap_destroy(void **pphmap)
 	*pphmap = NULL;
 }
 
-int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value)
+int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value, void **old_value)
 {
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
 	struct hnode *phnode = NULL;
 	struct hnode *tmp = NULL;
-	uint32_t uikey;
+	uint8_t hkey[16];
 
 	if (!phmap || !key || !value || !key_l)
 		return -1;
 
-	phnode = calloc(1, sizeof(*phnode));
-	if (!phnode)
-		return -1;
-
-	md5(key, key_l, phnode->hkey);
-	memcpy((void *)&uikey, (void *)phnode->hkey, 4);
-	first = HMAP_GET_FIRST(phmap, uikey);
-
+	first = HMAP_GET_FIRST(phmap, key, key_l, hkey);
 	list_for_each_entry(tmp, first, node) {
-		if (!memcmp(tmp->hkey, phnode->hkey, 16)) {
-			phnode->value = value;
+		if (!KEY_CMP(tmp->hkey, hkey, 16)) {
+			*old_value = tmp->value;
+			tmp->value = value;
 			return 0;
 		}
 	}
 
+	phnode = malloc(sizeof(*phnode));
+	if (!phnode)
+		return -1;
+
 	phnode->value = value;
+	memcpy(phnode->hkey, hkey, 16);
 	list_add_tail(&phnode->node, first);
 	Tatomic_addf(&phmap->node_size, 1);
 
@@ -118,18 +129,14 @@ int Thmap_delete(void *_phmap, void *key, size_t key_l)
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
 	struct hnode *phnode = NULL;
-	uint32_t uikey;
 	char hkey[16];
 
 	if (!phmap || !key)
 		return -1;
 
-	md5(key, key_l, hkey);
-	memcpy((void *)&uikey, (void *)hkey, 4);
-	first = HMAP_GET_FIRST(phmap, uikey);
-
+	first = HMAP_GET_FIRST(phmap, key, key_l, hkey);
 	list_for_each_entry(phnode, first, node) {
-		if (!memcmp(phnode->hkey, hkey, 16)) {
+		if (!KEY_CMP(phnode->hkey, hkey, 16)) {
 			list_del(&phnode->node);
 			free(phnode);
 			Tatomic_subf(&(phmap->node_size), 1);
@@ -145,19 +152,15 @@ void *Thmap_delete_search(void *_phmap, void *key, size_t key_l)
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
 	struct hnode *phnode = NULL;
-	uint32_t uikey;
 	char hkey[16];
 	void *value;
 
 	if (!phmap || !key)
 		return NULL;
 
-	md5(key, key_l, hkey);
-	memcpy((void *)&uikey, (void *)hkey, 4);
-	first = HMAP_GET_FIRST(phmap, uikey);
-
+	first = HMAP_GET_FIRST(phmap, key, key_l, hkey);
 	list_for_each_entry(phnode, first, node) {
-		if (!memcmp(phnode->hkey, hkey, 16)) {
+		if (!KEY_CMP(phnode->hkey, hkey, 16)) {
 			list_del(&phnode->node);
 			value = phnode->value;
 			free(phnode);
@@ -174,18 +177,14 @@ void *Thmap_search(void *_phmap, void *key, size_t key_l)
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
 	struct hnode *phnode = NULL;
-	uint32_t uikey;
 	char hkey[16];
 
 	if (!phmap || !key)
 		return NULL;
 
-	md5(key, key_l, hkey);
-	memcpy((void *)&uikey, (void *)hkey, 4);
-	first = HMAP_GET_FIRST(phmap, uikey);
-
+	first = HMAP_GET_FIRST(phmap, key, key_l, hkey);
 	list_for_each_entry(phnode, first, node) {
-		if (!memcmp(phnode->hkey, hkey, 16)) {
+		if (!KEY_CMP(phnode->hkey, hkey, 16)) {
 			return phnode->value;
 		}
 	}

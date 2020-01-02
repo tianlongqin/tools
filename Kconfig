@@ -44,3 +44,9 @@ default  y
 config	HASHMAP
 bool    "hash map"
 default  y
+select MD5
+	config MD5
+	bool "MD5 digest, use MD5 digest compute hash value "
+	depends on HASHMAP
+	default y
+
