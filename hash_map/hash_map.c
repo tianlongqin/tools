@@ -106,7 +106,8 @@ int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value, void **old_
 	first = HMAP_GET_FIRST(phmap, key, key_l, hkey);
 	list_for_each_entry(tmp, first, node) {
 		if (!KEY_CMP(tmp->hkey, hkey, 16)) {
-			*old_value = tmp->value;
+			if (tmp->value != value)
+				*old_value = tmp->value;
 			tmp->value = value;
 			return 0;
 		}
