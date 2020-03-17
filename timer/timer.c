@@ -101,19 +101,12 @@ static int clk_new(void *timer, struct clk_event *event)
 	struct clk_timer *t = (struct clk_timer *)timer;
 	struct clk_event *e = &t->event;
 	struct itimerspec new_value;
-	struct timespec now;
 
 	e->handle = event->handle;
 	e->args = event->args;
 
-	ret = clock_gettime(CLOCK_MONOTONIC, &now);//获取时钟时间
-	if (ret < 0) {
-		printf("clock_gettime failed\n");
-		return -1;
-	}
-
 	new_value.it_value.tv_sec = event->start.tv_sec; //第一次到期的时间
-	new_value.it_value.tv_nsec = event->start.tv_nsec + now.tv_nsec;
+	new_value.it_value.tv_nsec = event->start.tv_nsec;
 
 	new_value.it_interval.tv_sec = event->interval.tv_sec;      //之后每次到期的时间间隔
 	new_value.it_interval.tv_nsec = event->interval.tv_nsec;
@@ -220,6 +213,7 @@ void Tclk_exit(void)
 
 	clk_head.event_run = 0;
 	close(clk_head.epollfd);
+
 
 	pthread_cancel(clk_head.eventid);
 	pthread_join(clk_head.eventid, NULL);

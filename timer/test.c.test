@@ -31,7 +31,7 @@ int main(int argc, const char *argv[])
 	rc = Tclk_new(&timer, &event);
 	event.handle = test1;
 	event.args = NULL;
-	event.start.tv_sec = 0;
+	event.start.tv_sec = 2;
 	event.start.tv_nsec = 0;
 	event.interval.tv_sec = 2;
 	event.interval.tv_nsec = 0;
