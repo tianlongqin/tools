@@ -59,10 +59,10 @@ static struct clk_head {
 
 static int clk_new(void *timer, struct clk_event *event);
 static void clk_del(void *timer);
-static int clk_add_event(int timerfd);
+static int clk_add_event(void *timer);
 static int clk_del_event(int timerfd);
 static void *clk_event(void *args);
-static void *clk_run_event(int fd);
+static void *clk_run_event(void *timer);
 
 /*
  * time_t tv_sec // seconds
@@ -119,7 +119,7 @@ static int clk_new(void *timer, struct clk_event *event)
 
 	ret = timerfd_settime(t->timerfd, 0, &new_value, NULL);//启动定时器
 
-	return clk_add_event(t->timerfd);
+	return clk_add_event(t);
 }
 
 static void clk_del(void *timer)
@@ -130,13 +130,14 @@ static void clk_del(void *timer)
 	close(t->timerfd);
 }
 
-static int clk_add_event(int timerfd)
+static int clk_add_event(void *timer)
 {
+	struct clk_timer *t = (struct clk_timer *)timer;
 	struct epoll_event ev;
-	ev.data.fd = timerfd;
+	ev.data.ptr = (void *)t;
 	ev.events = EPOLLIN | EPOLLET;
 
-	return epoll_ctl(clk_head.epollfd, EPOLL_CTL_ADD, timerfd, &ev);
+	return epoll_ctl(clk_head.epollfd, EPOLL_CTL_ADD, t->timerfd, &ev);
 }
 
 static inline int clk_del_event(int timerfd)
@@ -144,25 +145,19 @@ static inline int clk_del_event(int timerfd)
 	return epoll_ctl(clk_head.epollfd, EPOLL_CTL_DEL, timerfd, NULL);
 }
 
-static void *clk_run_event(int fd)
+static void *clk_run_event(void *timer)
 {
 	uint64_t exp = 0;
 	ssize_t s;
-	struct clk_head *head = &clk_head;
-	struct clk_timer *t;
+	struct clk_timer *t = timer;
 	struct clk_event *event;
-	/* find timer fd */
-	list_for_each_entry(t, &head->head, node) {
-		if (fd == t->timerfd) {
-			event = &t->event;
-			/* 需要读出uint64_t大小, 不然会发生错误 */
-			s = read(fd, &exp, sizeof(uint64_t));
-			if (s != sizeof(uint64_t))
-				perror("clk event read failed:");
-			/* run clk timer event function */
-			return event->handle(event->args);
-		}
-	}
+	event = &t->event;
+	/* 需要读出uint64_t大小, 不然会发生错误 */
+	s = read(t->timerfd, &exp, sizeof(uint64_t));
+	if (s != sizeof(uint64_t))
+		perror("clk event read failed:");
+	/* run clk timer event function */
+	return event->handle(event->args);
 
 	return NULL;
 }
@@ -184,7 +179,7 @@ static void *clk_event(void *args)
 
 		for (i = 0; i < num; i++) {
 			if (head->events[i].events & EPOLLIN)
-				clk_run_event(head->events[i].data.fd);
+				clk_run_event(head->events[i].data.ptr);
 		}
 	}
 }
