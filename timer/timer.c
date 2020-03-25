@@ -64,6 +64,7 @@ static int clk_del_event(int timerfd);
 static void *clk_event(void *args);
 static void *clk_run_event(void *timer);
 static void clk_del_node(void *timer);
+static void *clk_run_event_thread(void *args);
 
 /*
  * time_t tv_sec // seconds
@@ -105,6 +106,7 @@ static int clk_new(void *timer, struct clk_event *event)
 
 	e->handle = event->handle;
 	e->args = event->args;
+	e->flags = event->flags;
 
 	new_value.it_value.tv_sec = event->start.tv_sec; //第一次到期的时间
 	new_value.it_value.tv_nsec = event->start.tv_nsec;
@@ -148,6 +150,7 @@ static inline int clk_del_event(int timerfd)
 
 static void *clk_run_event(void *timer)
 {
+	pthread_t id;
 	uint64_t exp = 0;
 	ssize_t s;
 	struct clk_timer *t = timer;
@@ -157,7 +160,21 @@ static void *clk_run_event(void *timer)
 	s = read(t->timerfd, &exp, sizeof(uint64_t));
 	if (s != sizeof(uint64_t))
 		perror("clk event read failed:");
-	/* run clk timer event function */
+	if (event->flags & TCLK_EVENT_FLAG_THREAD)
+		pthread_create(&id, NULL, clk_run_event_thread, timer);
+	else
+		/* run clk timer event function */
+		return event->handle(event->args);
+}
+
+static void *clk_run_event_thread(void *args)
+{
+	struct clk_timer *t = args;
+	struct clk_event *event = &t->event;
+
+	/* datch thread, automatic recycling */
+	pthread_detach(pthread_self());
+
 	return event->handle(event->args);
 }
 

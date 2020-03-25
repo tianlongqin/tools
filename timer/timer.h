@@ -2,11 +2,16 @@
 #define __TIMER_HH_19910612__
 #include <time.h>
 
+
+#define TCLK_EVENT_FLAG_NOT_THREAD	0
+#define TCLK_EVENT_FLAG_THREAD		1
+
 struct clk_event {
 	struct timespec start;
 	struct timespec interval;
 	void *(*handle)(void *);
 	void *args;
+	int flags;
 };
 
 #ifdef __cplusplus
