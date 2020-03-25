@@ -12,17 +12,25 @@ void *test1(void *args)
 	printf("hello test1\n");
 }
 
+void *test2(void *args)
+{
+	sleep(10);
+	printf("hello test2\n");
+}
+
 int main(int argc, const char *argv[])
 {
 	int rc;
 	void *timer;
 	void *timer1;
+	void *timer2;
 	struct clk_event event;
 
 	Tclk_init();
 
 	event.handle = test;
 	event.args = NULL;
+	event.flags = TCLK_EVENT_FLAG_NOT_THREAD;
 	event.start.tv_sec = 3;
 	event.start.tv_nsec = 0;
 	event.interval.tv_sec = 0;
@@ -31,18 +39,23 @@ int main(int argc, const char *argv[])
 	rc = Tclk_new(&timer, &event);
 	event.handle = test1;
 	event.args = NULL;
+	event.flags = TCLK_EVENT_FLAG_NOT_THREAD;
 	event.start.tv_sec = 2;
 	event.start.tv_nsec = 0;
 	event.interval.tv_sec = 2;
 	event.interval.tv_nsec = 0;
 	rc = Tclk_new(&timer1, &event);
 
-	sleep(5);
-	Tclk_del(&timer);
+	event.handle = test2;
+	event.args = NULL;
+	event.flags = TCLK_EVENT_FLAG_THREAD;
+	event.start.tv_sec = 1;
+	event.start.tv_nsec = 0;
+	event.interval.tv_sec = 0;
+	event.interval.tv_nsec = 0;
+	rc = Tclk_new(&timer2, &event);
 
-	sleep(5);
-	Tclk_del(&timer1);
-
+	pause();
 	Tclk_exit();
 
 	return 0;
