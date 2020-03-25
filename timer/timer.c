@@ -63,6 +63,7 @@ static int clk_add_event(void *timer);
 static int clk_del_event(int timerfd);
 static void *clk_event(void *args);
 static void *clk_run_event(void *timer);
+static void clk_del_node(void *timer);
 
 /*
  * time_t tv_sec // seconds
@@ -158,8 +159,6 @@ static void *clk_run_event(void *timer)
 		perror("clk event read failed:");
 	/* run clk timer event function */
 	return event->handle(event->args);
-
-	return NULL;
 }
 
 static void *clk_event(void *args)
@@ -184,6 +183,15 @@ static void *clk_event(void *args)
 	}
 }
 
+static void clk_del_node(void *timer)
+{
+	struct clk_timer *t = timer;
+
+	clk_del(t);
+	list_del(&t->node);
+	free(t);
+}
+
 int Tclk_init(void)
 {
 	INIT_LIST_HEAD(&clk_head.head);
@@ -205,6 +213,7 @@ void Tclk_exit(void)
 	if (!clk_head.init)
 		return ;
 
+	struct clk_timer *t, *n;
 
 	clk_head.event_run = 0;
 	close(clk_head.epollfd);
@@ -213,6 +222,11 @@ void Tclk_exit(void)
 	pthread_cancel(clk_head.eventid);
 	pthread_join(clk_head.eventid, NULL);
 	clk_head.init = 0;
+
+	list_for_each_entry_safe(t, n, &(clk_head.head), node) {
+		clk_del_node(t);
+		t= NULL;
+	}
 }
 
 int Tclk_new(void **timer, struct clk_event *event)
@@ -254,9 +268,6 @@ void Tclk_del(void **timer)
 	if (!t)
 		return ;
 
-	clk_del(t);
-
-	list_del(&t->node);
-	free(t);
+	clk_del_node(t);
 	*timer = NULL;
 }
