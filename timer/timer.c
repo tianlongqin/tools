@@ -188,7 +188,7 @@ static void *clk_event(void *args)
 			if (errno == EINTR) {
 				continue;
 			} else {
-				perror("epoll_wait failed\n");
+				perror("epoll_wait failed");
 				exit(1);
 			}
 		}
@@ -258,13 +258,20 @@ int Tclk_new(void **timer, struct clk_event *event)
 		return -1;
 	}
 
-	//list_add_tail(&(clk_head.head), &t->node);
 	list_add_tail(&t->node, &(clk_head.head));
 
-	rc = clk_new(t, event);
-	if (rc < 0) {
-		printf("clk create failed\n");
-		goto err;
+	if (event) {
+		rc = clk_new(t, event);
+		if (rc < 0) {
+			printf("clk create failed\n");
+			goto err;
+		}
+	} else {
+		t->timerfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK); // 构建了一个定时器
+		if (t->timerfd < 0) {
+			perror("timerfd create failed:");
+			goto err;
+		}
 	}
 
 	*timer = (void *)t;
@@ -274,6 +281,71 @@ err:
 	free(t);
 
 	return -1;
+}
+
+int Tclk_start(void *timer, struct clk_event *event)
+{
+	int ret;
+	struct clk_timer *t = (struct clk_timer *)timer;
+	struct clk_event *e = &t->event;
+	struct itimerspec new_value;
+
+	e->handle = event->handle;
+	e->args = event->args;
+	e->flags = event->flags;
+
+	new_value.it_value.tv_sec = event->start.tv_sec;
+	new_value.it_value.tv_nsec = event->start.tv_nsec;
+
+	new_value.it_interval.tv_sec = event->interval.tv_sec;
+	new_value.it_interval.tv_nsec = event->interval.tv_nsec;
+
+	ret = timerfd_settime(t->timerfd, 0, &new_value, NULL);
+	if (ret < 0) {
+		perror("timerfd_settime failed:");
+	}
+
+	return clk_add_event(t);
+}
+
+int Tclk_restart(void *timer, struct clk_event *event)
+{
+	int ret;
+	struct clk_timer *t = (struct clk_timer *)timer;
+	struct clk_event *e = &t->event;
+	struct itimerspec new_value;
+
+	e->handle = event->handle;
+	e->args = event->args;
+	e->flags = event->flags;
+
+	new_value.it_value.tv_sec = event->start.tv_sec;
+	new_value.it_value.tv_nsec = event->start.tv_nsec;
+
+	new_value.it_interval.tv_sec = event->interval.tv_sec;
+	new_value.it_interval.tv_nsec = event->interval.tv_nsec;
+
+	return timerfd_settime(t->timerfd, 0, &new_value, NULL);
+}
+
+void Tclk_stop(void *timer)
+{
+	int ret;
+	struct itimerspec new_value;
+	struct clk_timer *t = (struct clk_timer *) timer;
+
+	ret = clk_del_event(t->timerfd);
+	if (ret < 0)
+		perror("Tclk_stop clk_del_event waring:");
+
+	/* stop the timer clock */
+	new_value.it_value.tv_sec = 0;
+	new_value.it_value.tv_nsec = 0;
+	new_value.it_interval.tv_sec = 0;
+	new_value.it_interval.tv_nsec = 0;
+	ret = timerfd_settime(t->timerfd, 0, &new_value, NULL);
+	if (ret < 0)
+		perror("Tclk_stop timerfd_settime waring:");
 }
 
 void Tclk_del(void **timer)

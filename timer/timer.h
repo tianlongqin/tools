@@ -21,6 +21,9 @@ extern int Tclk_nanosleep(time_t tv_sec, long tv_nsec);
 extern int Tclk_init(void);
 extern void Tclk_exit(void);
 extern int Tclk_new(void **timer, struct clk_event *event);
+extern int Tclk_start(void *timer, struct clk_event *event);
+extern int Tclk_restart(void *timer, struct clk_event *event);
+extern void Tclk_stop(void *timer);
 extern void Tclk_del(void **timer);
 
 #ifdef __cplusplus
