@@ -3,7 +3,7 @@ mainmenu "Configuration"
 config ARCH
 	bool "CPU ARCH"
 choice
-	prompt "select ARCH"
+	prompt "Select ARCH"
 	depends on ARCH
 	default X86
 
@@ -52,30 +52,45 @@ bool    "Thread pool tool, Be related to thread pool"
 default  y
 
 config  SERIAL
-bool    "serial port tool, Be related to serial port"
+bool    "Serial port tool, Be related to serial port"
 default  y
 
 config  TIMER
-bool    "time tool, Be related to time function"
+bool    "Time tool, Be related to time function"
 default  y
 
 config  SIGNAL
-bool    "signal tool, Be related to signal function"
+bool    "Signal tool, Be related to signal function"
 default  y
 
 config	MATCH
-bool    "match algo tool, Be related to match algo function"
+bool    "Match algo tool, Be related to match algo function"
 default  y
 
 config	HASHMAP
-bool    "hash map"
+bool    "Hash map"
 default  y
 select MD5
 	config HASHMAP_MD5
-	bool "MD5 digest, use MD5 digest compute hash value "
+	bool "MD5 digest, Use MD5 digest compute hash value "
 	depends on HASHMAP
 	default y
 
 config RING
-bool	"ring, lock-free queue ring"
+bool	"Ring, Lock-free queue ring"
 default y
+
+	config RING_DEBUG
+	bool "Ring debug, Record the number of success/failure of each thread in and out of the queue"
+	depends on RING
+	default n
+
+	config CACHE_LINE_SIZE
+	int "CPU cache line, Default 64 bytes"
+	depends on RING
+	default 64
+
+	config RING_PAUSE_REP_COUNT
+	int "Yield after pause num of times, no yield if RTE_RING_PAUSE_REP not defined"
+	depends on RING
+	default 0
