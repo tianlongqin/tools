@@ -26,7 +26,7 @@ obj = $(patsubst %.c, %.o, $(src)) config.o
 
 LIB = -lpthread
 
-CFLAGS = -fPIC
+CFLAGS = -fPIC -DCONFIG_AUTOCONF
 INCLUDE = $(addprefix -I, $(obj-y)) -I$(TOPDIR) -I$(TOPDIR)/include
 
 build = ./build
