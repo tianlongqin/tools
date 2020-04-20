@@ -19,6 +19,7 @@ obj-$(CONFIG_TIMER)		+= timer
 obj-$(CONFIG_SIGNAL)		+= signal
 obj-$(CONFIG_MATCH)		+= match_algo
 obj-$(CONFIG_HASHMAP)		+= hash_map
+obj-$(CONFIG_RING)		+= ring
 
 src = $(foreach dir, $(obj-y), $(wildcard $(dir)/*.c))
 obj = $(patsubst %.c, %.o, $(src)) config.o

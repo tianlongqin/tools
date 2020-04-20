@@ -50,3 +50,6 @@ select MD5
 	depends on HASHMAP
 	default y
 
+config RING
+bool	"ring, lock-free queue ring"
+default y
