@@ -14,6 +14,7 @@
 |timer|时间操作的接口集合，目前有解决嗜睡（oversleeping）问题的高精度sleep函数clk_nanosleep。注意：使用timer集合的任意函数，在glibc 2.17版本之前都需要连接-lrt动态库。添加定时器操作接口。|
 |signal|信号操作的接口集合，目前封装了信号阻塞/解除阻塞的函数接口，后续会添加更多的功能接口。|
 |hash_map|使用md5作为hash计算基础的hashmap，hash冲突解决方案为链地址法。MD5算法借用https://github.com/pod32g/MD5.git|
+|ring|移植dpdk的librte_ring无锁队列，解耦了内存分配和部分原子操作，内存屏障等，不支持多进程，目前测试多线程表现良好。|
 ## 二、其他说明
 ### 1、快速开始
 * 相关依赖ncursesw tinfo bison flex，所以需要安装sudo apt-get install libncurses5-dev libtinfo-dev bison flex。
