@@ -3,7 +3,7 @@ mainmenu "Configuration"
 config  DEBUG
 bool    "Debug tool, Be related to print debug"
 default  y
-	config ENV
+	config DEBUG_ENV
 	bool "Open environment control"
 	depends on DEBUG
 	default n
@@ -45,7 +45,7 @@ config	HASHMAP
 bool    "hash map"
 default  y
 select MD5
-	config MD5
+	config HASHMAP_MD5
 	bool "MD5 digest, use MD5 digest compute hash value "
 	depends on HASHMAP
 	default y
