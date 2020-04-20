@@ -1,5 +1,31 @@
 mainmenu "Configuration"
 
+config ARCH
+	bool "CPU ARCH"
+choice
+	prompt "select ARCH"
+	depends on ARCH
+	default X86
+
+	config X86
+	bool "CPU ARCH X86"
+
+	config ARM
+	bool "CPU ARCH ARM"
+
+	config ARM64
+	bool "CPU ARCH ARM64"
+
+	config PPC
+	bool "CPU ARCH PPC"
+
+	config PPC64
+	bool "CPU ARCH PPC64"
+
+	config MIPS64
+	bool "CPU ARCH MIPS64"
+endchoice
+
 config  DEBUG
 bool    "Debug tool, Be related to print debug"
 default  y
