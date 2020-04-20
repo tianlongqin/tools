@@ -71,9 +71,14 @@ int Thmap_create(void **pphmap, size_t size)
 		return -1;
 
 	phmap = calloc(1, sizeof(*phmap));
-	first = calloc(size, sizeof(*first));
-	if (!first || !phmap)
+	if (!phmap)
 		return -1;
+
+	first = calloc(size, sizeof(*first));
+	if (!first) {
+		free(phmap);
+		return -1;
+	}
 
 	for (i = 0; i < size; i++)
 		INIT_LIST_HEAD(&first[i]);
