@@ -32,6 +32,10 @@ extern "C" {
 #include <sched.h>
 #include <errno.h>
 
+#ifdef CONFIG_AUTOCONF
+#include <generated/autoconf.h>
+#endif
+
 #define __cache_aligned __attribute__((__aligned__(64)))
 #define likely(x)  __builtin_expect((x),1)
 #define unlikely(x)  __builtin_expect((x),0)
@@ -171,14 +175,16 @@ static inline void synchronize(void)
 #define smp_wmb synchronize
 #define smp_rmb synchronize
 #elif CONFIG_ARM
-#define smp_wmb __sync_synchronize()
-#define smp_rmb do { asm volatile ("dmb st" : : : "memory"); } while (0)
+#define smp_wmb() __sync_synchronize()
+#define smp_rmb() do { asm volatile ("dmb st" : : : "memory"); } while (0)
 #elif CONFIG_ARM64
-#define smp_wmb do { asm volatile ("dmb ishst" : : : "memory"); } while (0)
-#define smp_rmb { asm volatile ("dmb ishld" : : : "memory"); } while (0)
+#define smp_wmb() do { asm volatile ("dmb ishst" : : : "memory"); } while (0)
+#define smp_rmb() { asm volatile ("dmb ishld" : : : "memory"); } while (0)
 #elif CONFIG_X86
-#define smp_wmb do { asm volatile ("" : : : "memory"); } while (0)
-#define smp_rmb do { asm volatile ("" : : : "memory"); } while (0)
+#define smp_wmb() do { asm volatile ("" : : : "memory"); } while (0)
+#define smp_rmb() do { asm volatile ("" : : : "memory"); } while (0)
+#else
+#error "Did not choose the right arch, Please make menuconfig, Choose the right arch"
 #endif
 
 
