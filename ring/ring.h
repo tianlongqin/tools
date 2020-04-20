@@ -36,7 +36,19 @@ extern "C" {
 #include <generated/autoconf.h>
 #endif
 
-#define __cache_aligned __attribute__((__aligned__(64)))
+#ifndef CONFIG_CACHE_LINE_SIZE
+#define CONFIG_CACHE_LINE_SIZE 64
+#endif
+
+#ifndef CONFIG_CACHE_LINE_MASK
+#define CONFIG_CACHE_LINE_MASK (CONFIG_CACHE_LINE_SIZE - 1)
+#endif
+
+#ifndef CONFIG_RING_PAUSE_REP_COUNT
+#define CONFIG_RING_PAUSE_REP_COUNT 0 /**< Yield after pause num of times, no yield
+                                    *   if ring_PAUSE_REP not defined. */
+#endif
+#define __cache_aligned __attribute__((__aligned__(CONFIG_CACHE_LINE_SIZE)))
 #define likely(x)  __builtin_expect((x),1)
 #define unlikely(x)  __builtin_expect((x),0)
 #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
@@ -65,18 +77,7 @@ struct ring_debug_stats {
 } __cache_aligned;
 #endif
 
-#ifndef CONFIG_CACHE_LINE_SIZE
-#define CONFIG_CACHE_LINE_SIZE 64
-#endif
 
-#ifndef CONFIG_CACHE_LINE_MASK
-#define CONFIG_CACHE_LINE_MASK (CONFIG_CACHE_LINE_SIZE - 1)
-#endif
-
-#ifndef CONFIG_RING_PAUSE_REP_COUNT
-#define CONFIG_RING_PAUSE_REP_COUNT 0 /**< Yield after pause num of times, no yield
-                                    *   if ring_PAUSE_REP not defined. */
-#endif
 
 /**
  * An RTE ring structure.

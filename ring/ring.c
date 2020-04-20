@@ -93,7 +93,7 @@ ssize_t ring_get_memsize(unsigned count)
 	}
 
 	sz = sizeof(struct ring) + count * sizeof(void *);
-	sz = (size_t) ((sz + (size_t) (64 - 1)) & ~((size_t)(64 - 1)));
+	sz = (size_t) ((sz + (size_t) (CONFIG_CACHE_LINE_MASK)) & ~((size_t)(CONFIG_CACHE_LINE_MASK)));
 	return sz;
 }
 
