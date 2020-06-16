@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-extern int Tshm_open(const char *pathname, int proj_id, size_t size);
+extern int Tshm_create(const char *pathname, int proj_id, size_t size);
 extern void *Tshm_attach_ptr(int shmid);
 extern int Tshm_attach_num(int shmid);
 extern int Tshm_destroy(int shmid);

@@ -34,7 +34,7 @@
 
 static int _shm_open(key_t key);
 
-int Tshm_open(const char *pathname, int proj_id, size_t size)
+int Tshm_create(const char *pathname, int proj_id, size_t size)
 {
 	int shmid, rc;
 	key_t key = ftok(pathname, proj_id);

@@ -15,7 +15,7 @@ int main(int argc, const char *argv[])
 
 	pid = fork();
 	if (pid > 0) {
-		shmid = Tshm_open("/", 'a', 100);
+		shmid = Tshm_create("/", 'a', 100);
 		if (shmid < 0) {
 			printf("errno: %d\n", errno);
 			goto out;
