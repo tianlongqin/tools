@@ -9,7 +9,8 @@ extern "C" {
 #endif
 
 extern void Tprint_debug(const char *szFormat, ...);
-extern void Tprint_hex_dump_debug(const char *prompt, const void *buffer, size_t size);
+extern void Tprint_hex_dump_fp(FILE *fp, const char *prompt, const void *buffer, size_t size);
+extern void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size);
 extern void Tprint_err(int line, const char *func, const char *szFormat, ...);
 extern void Tprint_info(int line, const char *func, const char *szFormat, ...);
 extern int Thex_to_bin(char ch);

@@ -104,7 +104,7 @@ void Tprint_err(int line, const char *func, const char *szFormat, ...)
 	printf("\033[31m%s\033[0m", pDate);
 }
 
-void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
+void Tprint_hex_dump_fp(FILE *fp, const char *prompt, const void *buffer, size_t size)
 {
 	int i, j, m;
 	int same;
@@ -119,7 +119,7 @@ void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
 		if (i >= 0x10 && (i + 0x10) <= size) {
 			if (!memcmp(c + i - 0x10, c + i, 0x10)) {
 				if (!same)
-					printf("*\n");
+					fprintf(fp, "*\n");
 				same = 1;
 				j = 0x10;
 				continue;
@@ -127,35 +127,39 @@ void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
 		}
 
 		if (prompt)
-			printf("%s%08x  ", prompt, i);
+			fprintf(fp, "%s%08x  ", prompt, i);
 		else
-			printf("%08x  ", i);
+			fprintf(fp, "%08x  ", i);
 		same = 0;
 		for (j = 0; j < 0x10; j++) {
 			m = i + j;
 			if (m < size)
-				printf("%02x ", c[m]);
+				fprintf(fp, "%02x ", c[m]);
 			else
-				printf("   ");
+				fprintf(fp, "   ");
 			if (j == 7 || j == 15)
-				printf(" ");
+				fprintf(fp, " ");
 		}
-		printf("|");
+		fprintf(fp, "|");
 		for (j = 0; j < 0x10; j++) {
 			m = i + j;
 			if (m < size)
-				printf("%c", c[m] < 32 || c[m] > 126 ? '.' : c[m]);
+				fprintf(fp, "%c", c[m] < 32 || c[m] > 126 ? '.' : c[m]);
 			else
 				break;
 		}
-		printf("|\n");
+		fprintf(fp, "|\n");
 	}
 	if (prompt)
-		printf("%s%08x\n", prompt, i);
+		fprintf(fp, "%s%08x\n", prompt, i);
 	else
-		printf("%08x\n", i);
+		fprintf(fp, "%08x\n", i);
 }
 
+void Tprint_hex_dump(const char *prompt, const void *buffer, size_t size)
+{
+	Tprint_hex_dump_fp(stdout, prompt, buffer, size);
+}
 /**
  * Thex_to_bin - convert a hex digit to its real value
  * @ch: ascii character represents hex digit
