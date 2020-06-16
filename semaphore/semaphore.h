@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-extern int Tsem_open(const char *pathname, int proj_id);
+extern int Tsem_create(const char *pathname, int proj_id);
+extern void Tsem_destroy(int semid);
 extern int Tsem_lock(int semid);
 extern int Tsem_unlock(int semid);
 

@@ -48,7 +48,37 @@ static struct sembuf const up = {0, 1, SEM_UNDO};
 static struct sembuf const down = {0, -1, SEM_UNDO};
 static int _sem_open(key_t key);
 
-int Tsem_open(const char *pathname, int proj_id)
+static int _sem_open(key_t key)
+{
+	int id, rc, i;
+	union semun arg;
+	struct semid_ds ds;
+	id = semget(key, 1, 0666);
+	if(id == -1)
+		goto err;
+
+	arg.buf = &ds;
+
+	for (i = 0; i < 10; i++) {
+		rc = semctl(id, 0, IPC_STAT, arg);
+		if (rc == -1)
+			goto err;
+
+		if(ds.sem_otime != 0)
+			break;
+
+		usleep(10 * 1000);
+	}
+
+	if (ds.sem_otime == 0)
+		goto err;
+
+	return id;
+err:
+	return -1;
+}
+
+int Tsem_create(const char *pathname, int proj_id)
 {
 	int semid, rc;
 	union semun arg;
@@ -80,34 +110,9 @@ __exit:
 	return rc;
 }
 
-static int _sem_open(key_t key)
+void Tsem_destroy(int semid)
 {
-	int id, rc, i;
-	union semun arg;
-	struct semid_ds ds;
-	id = semget(key, 1, 0666);
-	if(id == -1)
-		goto err;
-
-	arg.buf = &ds;
-
-	for (i = 0; i < 10; i++) {
-		rc = semctl(id, 0, IPC_STAT, arg);
-		if (rc == -1)
-			goto err;
-
-		if(ds.sem_otime != 0)
-			break;
-
-		usleep(10 * 1000);
-	}
-
-	if (ds.sem_otime == 0)
-		goto err;
-
-	return id;
-err:
-	return -1;
+	semctl(semid, 0, IPC_RMID);
 }
 
 int Tsem_lock(int semid)
