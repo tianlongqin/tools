@@ -76,7 +76,13 @@ menuconfig: $(mconf)
 	@mkdir -p include/config include/generated
 	@$(conf) --syncconfig Kconfig
 
-$(mconf):
+PHONY += menu
+menu: $(conf)
+	@$< Kconfig
+	@mkdir -p include/config include/generated
+	@$< --syncconfig Kconfig
+
+$(conf) $(mconf):
 	$(MAKE) -C $(CURDIR)/scripts/kconfig all
 
 sysconfig: $(conf) $(KCONFIG_CONFIG)
