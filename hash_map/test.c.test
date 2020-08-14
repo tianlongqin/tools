@@ -20,12 +20,12 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	rc = Thmap_insert(phmap, key, key_l, value);
+	rc = Thmap_insert(phmap, key, key_l, value, NULL);
 	if (rc < 0) {
 		printf("Thmap_insert failed\n");
 	}
 
-	rc = Thmap_insert(phmap, key1, key1_l, value1);
+	rc = Thmap_insert(phmap, key1, key1_l, value1, NULL);
 	if (rc < 0)
 		printf("Thmap_insert failed\n");
 	
@@ -39,12 +39,12 @@ int main(int argc, const char *argv[])
 	if (pvalue)
 		printf("%s\n", pvalue);
 
-	rc = Thmap_delete(phmap, key, key_l);
+	rc = Thmap_delete(phmap, key, key_l, NULL);
 	if (rc < 0) {
 		printf("Thmap_delete failed\n");
 	}
 
-	rc = Thmap_delete(phmap, key1, key1_l);
+	rc = Thmap_delete(phmap, key1, key1_l, NULL);
 	if (rc < 0) {
 		printf("Thmap_delete failed\n");
 	}

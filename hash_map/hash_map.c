@@ -131,10 +131,13 @@ int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value, void **old_
 	if (!phmap || !key || !value || !key_l)
 		return -1;
 
+	if (old_value)
+		*old_value = NULL;
+
 	first = HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l);
 	list_for_each_entry(tmp, first, node) {
 		if (!KEY_CMP(tmp->hkey, hkey, hkey_l)) {
-			if (tmp->value != value)
+			if ((tmp->value != value) && old_value)
 				*old_value = tmp->value;
 			tmp->value = value;
 			return 0;
@@ -153,7 +156,7 @@ int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value, void **old_
 	return 0;
 }
 
-int Thmap_delete(void *_phmap, void *key, size_t key_l)
+int Thmap_delete(void *_phmap, void *key, size_t key_l, void **old_value)
 {
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
@@ -164,10 +167,15 @@ int Thmap_delete(void *_phmap, void *key, size_t key_l)
 	if (!phmap || !key)
 		return -1;
 
+	if (old_value)
+		*old_value = NULL;
+
 	first = HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l);
 	list_for_each_entry(phnode, first, node) {
 		if (!KEY_CMP(phnode->hkey, hkey, hkey_l)) {
 			list_del(&phnode->node);
+			if (old_value)
+				*old_value = phnode->value;
 			free(phnode);
 			Tatomic_subf(&(phmap->node_size), 1);
 			break;
@@ -175,32 +183,6 @@ int Thmap_delete(void *_phmap, void *key, size_t key_l)
 	}
 
 	return 0;
-}
-
-void *Thmap_delete_search(void *_phmap, void *key, size_t key_l)
-{
-	struct hmap *phmap = _phmap;
-	struct list_head *first = NULL;
-	struct hnode *phnode = NULL;
-	char hkey[KEY_MAX];
-	uint32_t hkey_l = 0;
-	void *value;
-
-	if (!phmap || !key)
-		return NULL;
-
-	first = HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l);
-	list_for_each_entry(phnode, first, node) {
-		if (!KEY_CMP(phnode->hkey, hkey, hkey_l)) {
-			list_del(&phnode->node);
-			value = phnode->value;
-			free(phnode);
-			Tatomic_subf(&(phmap->node_size), 1);
-			return value;
-		}
-	}
-
-	return NULL;
 }
 
 void *Thmap_search(void *_phmap, void *key, size_t key_l)
