@@ -2,6 +2,7 @@ mainmenu "Configuration"
 
 config ARCH
 	bool "CPU ARCH"
+	default y
 choice
 	prompt "Select ARCH"
 	depends on ARCH
