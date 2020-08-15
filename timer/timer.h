@@ -12,6 +12,7 @@ struct clk_event {
 	void *(*handle)(void *);
 	void *args;
 	int flags;
+	char name[16];
 };
 
 #ifdef __cplusplus
@@ -25,6 +26,7 @@ extern int Tclk_start(void *timer, struct clk_event *event);
 extern int Tclk_restart(void *timer, struct clk_event *event);
 extern void Tclk_stop(void *timer);
 extern void Tclk_del(void **timer);
+extern int Tclk_lookup(void **timer, char *name);
 
 #ifdef __cplusplus
 }

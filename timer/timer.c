@@ -39,6 +39,7 @@
 
 #include <list.h>
 #include <timer.h>
+#include <string.h>
 
 struct clk_timer {
 	struct list_head node;
@@ -261,6 +262,7 @@ int Tclk_new(void **timer, struct clk_event *event)
 	}
 
 	list_add_tail(&t->node, &(clk_head.head));
+	memcpy(t->name, event->name, sizeof(t->name));
 
 	if (event) {
 		rc = clk_new(t, event);
@@ -361,4 +363,19 @@ void Tclk_del(void **timer)
 
 	clk_del_node(t);
 	*timer = NULL;
+}
+
+int Tclk_lookup(void **timer, char *name)
+{
+	int len;
+	struct clk_timer *t;
+	list_for_each_entry(t, &(clk_head.head), node) {
+		len = strlen(name) > sizeof(t->name) ? sizeof(t->name) : strlen(name);
+		if(!strncmp(t->name, name, len)) {
+			*timer = t;
+			return 0;
+		}
+	}
+
+	return -1;
 }
