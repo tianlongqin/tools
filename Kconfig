@@ -51,6 +51,10 @@ default  y
 config  THREADPOOL
 bool    "Thread pool tool, Be related to thread pool"
 default  y
+	config THREADPOOL_THREAD_MAX
+	int "Thread pool max thread number"
+	depends on THREADPOOL
+	default 64
 
 config  SERIAL
 bool    "Serial port tool, Be related to serial port"

@@ -17,26 +17,26 @@ int main(int argc, const char *argv[])
 {
 	int rc;
 	void *pool;
-	int i;
+	int i, minid;
 
-	rc = Tthreadpool_create(&pool, 8, 10000);
+	rc = Tthreadpool_create(&pool, 8);
 	if (rc < 0) {
 		printf("threadpool_create false\n");
 		return -1;
 	}
 
 	for (i = 0; i < 10000; i++) {
-		rc = Tthreadpool_add_task(pool, test, NULL);
+		minid = Tthreadpool_get_minid(pool);
+		rc = Tthreadpool_add_task(pool, minid, test, NULL);
 		if (rc < 0) {
 			printf("threadpool_create false\n");
 			return -1;
 		}
 
 	}
+	Tthreadpool_loop(pool);
 
-	sleep(1);
-
-	Tthreadpool_destroy(pool);
+	Tthreadpool_destroy(&pool);
 
 	return 0;
 }

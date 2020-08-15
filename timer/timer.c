@@ -223,6 +223,8 @@ int Tclk_init(void)
 	clk_head.init = 1;
 
 	pthread_create(&clk_head.eventid, NULL, clk_event, NULL);
+
+	return 0;
 }
 
 void Tclk_exit(void)
