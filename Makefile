@@ -43,7 +43,7 @@ ar_name = libtool.a
 define create_config
 	@echo "#include <stdio.h>"	> $@
 	@echo "void config(void) {" >> $@
-	@cat .config |tr -s '\n'|grep -v "#"| awk '{print "printf(\"" $$1 "\");"}' >> $@
+	@cat .config |tr -s '\n'|grep -v "[#\"]"| awk '{print "printf(\"" $$1 "\");"}' >> $@
 	@echo "}" >> $@
 endef
 
