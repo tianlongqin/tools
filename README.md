@@ -15,6 +15,7 @@
 |signal|信号操作的接口集合，目前封装了信号阻塞/解除阻塞的函数接口，后续会添加更多的功能接口。|
 |hash_map|使用md5作为hash计算基础的hashmap，hash冲突解决方案为链地址法。MD5算法借用https://github.com/pod32g/MD5.git|
 |ring|移植dpdk的librte_ring无锁队列，解耦了内存分配和部分原子操作，内存屏障等，不支持多进程，目前测试多线程表现良好。|
+|3rdpart| 第三方库源码存放，目前支持zlog，封装在Tprint.h中。
 ## 二、其他说明
 ### 1、快速开始
 * 相关依赖ncursesw tinfo bison flex，所以需要安装sudo apt-get install libncurses5-dev libtinfo-dev bison flex。
@@ -36,6 +37,7 @@
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/makeall.png)
 * makefile中添加include路径和libs路径。如图:
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/makefile.png)
+* 因为目前更新改动，使用tools函数必须引用#include <generated/autoconf.h>,在其他tools文件前面
 * 在src文件中如何使用tools的头文件，include <dir/file.h>格式，如图：
  ![CONFIG](https://github.com/tianlongqin/tools/blob/master/images/incldue.png)
 * 准备工作已经完成，可以使用tools接口，然后进行编译即可。如图：
