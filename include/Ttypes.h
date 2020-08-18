@@ -19,6 +19,9 @@
 		(void) (&_x == &_y);	\
 		_x > _y ? _x : _y; })
 
+#define likely(x)       __builtin_expect(!!(x), 1)
+#define unlikely(x)     __builtin_expect(!!(x), 0)
+
 #define min_t(type, a, b) min(((type) a), ((type) b))
 #define max_t(type, a, b) max(((type) a), ((type) b))
 
