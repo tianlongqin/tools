@@ -29,7 +29,7 @@
 #define BUILD_BUG_ON_ZERO(e) 	(sizeof(struct{int:-!!(e);}))
 #define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
 
-#define ARRAY_SIZE(x) 		(sizeof(x) / sizeof((x)[0]) + __must_be_array(a))
+#define ARRAY_SIZE(x) 		(sizeof(x) / sizeof((x)[0]) + __must_be_array(x))
 
 #define container_of(ptr, type, member) ({			\
 			const typeof(((type *)0)->member) * __mptr = (ptr);	\
