@@ -1,0 +1,4 @@
+comment "The third party libraries"
+	config ZLOG
+	bool "builtin zlog library"
+	default n

@@ -59,3 +59,4 @@ config.c
 include/generated/
 include/config/
 a.out
+zlog.h

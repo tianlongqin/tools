@@ -27,6 +27,7 @@ choice
 	bool "CPU ARCH MIPS64"
 endchoice
 
+comment "The tools options"
 config  DEBUG
 bool    "Debug tool, Be related to print debug"
 default  y
@@ -99,3 +100,5 @@ default y
 	int "Yield after pause num of times, no yield if RTE_RING_PAUSE_REP not defined"
 	depends on RING
 	default 0
+
+source 3rdpart/Kconfig
