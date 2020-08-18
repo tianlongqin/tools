@@ -2,3 +2,18 @@ comment "The third party libraries"
 	config ZLOG
 	bool "builtin zlog library"
 	default n
+if ZLOG
+	comment "zlog configure file parameters"
+
+	config LOG_DIR
+	string "log file path"
+	default "/tmp/tools.log"
+
+	config LOG_FILESIZE
+	string "log file size default: 20MB"
+	default "20MB"
+
+	config LOG_ROTATE
+	string "log file retate default: 5"
+	default "5"
+endif
