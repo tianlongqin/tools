@@ -60,3 +60,4 @@ include/generated/
 include/config/
 a.out
 zlog.h
+zlog-1.3.0
