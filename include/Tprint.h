@@ -25,13 +25,13 @@
 	"info = \"%m\"\n" 				\
 	"debug = \"%d %V->%m\"\n" 			\
 	"warn = \"%d %F:%L %V->%m\"\n" 			\
-	"error = \"%d %us %V [%p](%F->%U:%L) %m\"\n"	\
+	"error = \"%d %us [%p](%F->%U:%L) %V->%m\"\n"	\
 	"[rules]\n"					\
 	"tools.=info \"/dev/tty\"; info\n" 		\
 	"tools.=debug \"/dev/tty\"; debug\n" 		\
 	"tools.=warn \"/dev/tty\"; warn\n" 		\
 	"tools.=error \"/dev/tty\"; error\n" 		\
-	"tools.* \"" CONFIG_LOG_DIR "\", " CONFIG_LOG_FILESIZE " * " CONFIG_LOG_ROTATE " ; \n"
+	"tools.* \"" CONFIG_LOG_DIR "\", " CONFIG_LOG_FILESIZE " * " CONFIG_LOG_ROTATE " ; error\n"
 
 #define CONFIG_LOG_CONFIG_PATH "/etc/tools_zlog.conf"
 
@@ -47,7 +47,7 @@ static int __dzlog_init(void)
 		if (rc)
 			return 1;
 
-		fp = fopen(CONFIG_LOG_CONFIG_PATH, "tools");
+		fp = fopen(CONFIG_LOG_CONFIG_PATH, "w");
 		if (!fp)
 			/*
 			 * We don't have permission of file,
