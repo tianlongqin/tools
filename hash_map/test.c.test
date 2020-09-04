@@ -13,6 +13,7 @@ int main(int argc, const char *argv[])
 	size_t key_l = strlen(key);
 	size_t key1_l = strlen(key1);
 	char *pvalue;
+	void *tmp1, *tmp2;
 
 	rc = Thmap_create(&phmap, 1024);
 	if (rc < 0) {
@@ -25,11 +26,15 @@ int main(int argc, const char *argv[])
 		printf("Thmap_insert failed\n");
 	}
 
+
 	rc = Thmap_insert(phmap, key1, key1_l, value1, NULL);
 	if (rc < 0)
 		printf("Thmap_insert failed\n");
 
 	printf("size:%d\n", Thmap_get_node_size(phmap));
+
+	Thmap_list_for_each(phmap, pvalue, key, key_l, tmp1, tmp2)
+		printf("%s\n", pvalue);
 
 	rc = Thmap_search(phmap, key, key_l, (void **)&pvalue);
 	if (rc < 0) {

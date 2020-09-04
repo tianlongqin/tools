@@ -33,6 +33,7 @@
 
 #include <generated/autoconf.h>
 #include <Terror.h>
+#include <Ttypes.h>
 #include <list.h>
 #include <hash_map.h>
 #ifdef CONFIG_HASHMAP_MD5
@@ -207,7 +208,7 @@ int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value, void **old_
 			return T_SUCCESS;
 	}
 	/* else  malloc new node, add list*/
-	phnode = malloc(sizeof(*phnode));
+	phnode = calloc(1, sizeof(*phnode));
 	if (!phnode)
 		return T_ENOMEM;
 
@@ -295,4 +296,30 @@ int Thmap_get_node_size(void *_phmap)
 {
 	struct hmap *phmap = _phmap;
 	return Tatomic_loadn(&phmap->node_allsize);
+}
+
+void *Thmap_get_list(void *_phmap, void *key, size_t key_l)
+{
+	struct hmap *phmap = _phmap;
+	struct hhead *phhead;
+	uint8_t hkey[KEY_MAX];
+	uint32_t hkey_l = 0;
+	int num;
+
+	hkey_l = get_key(key, key_l, hkey);
+	num = get_head_num(phmap, hkey, hkey_l);
+	phhead = get_head(phmap, num);
+
+	return get_head_node(phhead);
+}
+
+void *Thmap_get_value(void **node)
+{
+	struct hnode *phnode;
+	struct list_head *head = *node;
+
+	*node = head->next;
+	phnode = container_of(head->next, struct hnode, node);
+
+	return phnode->value;
 }
