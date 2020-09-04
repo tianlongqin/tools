@@ -32,33 +32,71 @@
 #include <string.h>
 
 #include <generated/autoconf.h>
+#include <Terror.h>
 #include <list.h>
 #include <hash_map.h>
 #ifdef CONFIG_HASHMAP_MD5
 #include <md5.h>
 #endif
-
-struct hmap {
-	struct list_head *first;
-	size_t size;
-	Tatomic_u32 node_size;
-};
-
+/* hmap -> hhead - head_node -> hnode */
 struct hnode {
 	struct list_head node;
 	char hkey[16];
 	void *value;
 };
 
-#define HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l)	({	\
-	hkey_l = get_hash(key, key_l, hkey);			\
-	(&(phmap->first[(*(uint32_t *)hkey) % phmap->size]));	\
-})
+struct hhead {
+	struct list_head head_node;		/* head node */
+	Tatomic_u32 node_size;			/* current list node size */
+};
 
-#define KEY_CMP(key1, key2, len)	memcmp(key1, key2, len)
+struct hmap {
+	struct hhead *phheads;			/* all first head node array */
+	Tatomic_u32 node_allsize;		/* current list node size */
+	size_t size;				/* first size */
+};
 
 #define KEY_MAX 16
-static uint32_t def_hash(uint8_t *s, uint32_t l, uint8_t *out)
+
+static int get_key(uint8_t *in, uint32_t l, uint8_t *out);
+
+static inline int cmp_key(void *key1, void *key2, size_t l)
+{
+	return memcmp(key1, key2, l);
+}
+
+static inline int get_head_num(struct hmap *phmap, void *hkey, size_t hkey_l)
+{
+	return *(uint32_t *)hkey % phmap->size;
+}
+
+static inline struct hhead *get_head(struct hmap *phmap, int num)
+{
+	return &phmap->phheads[num];
+}
+
+static inline struct list_head *get_head_node(struct hhead *phhead)
+{
+	return &(phhead->head_node);
+}
+
+static inline struct hnode *get_node(struct hmap *phmap, void *hkey, size_t hkey_l)
+{
+	int num;
+	struct hhead *phheads;
+	struct hnode *tmp;
+
+	num = get_head_num(phmap, hkey, hkey_l);
+	phheads = get_head(phmap, num);
+
+	list_for_each_entry(tmp, &(phheads->head_node), node)
+		if (!cmp_key(tmp->hkey, hkey, hkey_l))
+			return tmp;
+
+	return NULL;
+}
+
+static inline uint32_t def_hash(uint8_t *s, uint32_t l, uint8_t *out)
 {
 	uint32_t h = 0, i = 0;
 
@@ -70,7 +108,7 @@ static uint32_t def_hash(uint8_t *s, uint32_t l, uint8_t *out)
 	return h;
 }
 
-static int get_hash(uint8_t *in, uint32_t l, uint8_t *out)
+static inline int get_key(uint8_t *in, uint32_t l, uint8_t *out)
 {
 	int outl = 0;
 #ifdef CONFIG_HASHMAP_MD5
@@ -83,38 +121,59 @@ static int get_hash(uint8_t *in, uint32_t l, uint8_t *out)
 	return outl;
 }
 
+static inline void set_key(uint8_t *dest, uint8_t *src, uint32_t l)
+{
+	memcpy(dest, src, l);
+}
+
+static inline void set_value(struct hnode *phnode, void *value)
+{
+	phnode->value = value;
+}
+
+static inline void *get_value(struct hnode *phnode)
+{
+	return phnode->value;
+}
+
 int Thmap_create(void **pphmap, size_t size)
 {
 	int i;
-	struct list_head *first = NULL;
+	struct hhead *phheads = NULL;
 	struct hmap *phmap = NULL;
+	struct list_head *head_node;
 
 	if (size <= 0)
-		return -1;
+		return T_EINVAL;
 
 	phmap = calloc(1, sizeof(*phmap));
 	if (!phmap)
-		return -1;
+		return T_ENOMEM;
 
-	first = calloc(size, sizeof(*first));
-	if (!first) {
+	phheads = calloc(size, sizeof(*phheads));
+	if (!phheads) {
 		free(phmap);
-		return -1;
+		return T_ENOMEM;
 	}
 
-	for (i = 0; i < size; i++)
-		INIT_LIST_HEAD(&first[i]);
-
+	phmap->phheads = phheads;
 	phmap->size = size;
-	phmap->first = first;
-	Tatomic_storen(&phmap->node_size, 0);
+	for (i = 0; i < size; i++) {
+		head_node = get_head_node(get_head(phmap, i));
+		INIT_LIST_HEAD(head_node);
+	}
+
 	*pphmap = phmap;
 
-	return 0;
+	return T_SUCCESS;
 }
 
 void Thmap_destroy(void **pphmap)
 {
+	struct hmap *phmap = *pphmap;
+
+	free(phmap->phheads);
+	phmap->phheads = NULL;
 	free(*pphmap);
 	*pphmap = NULL;
 }
@@ -122,70 +181,96 @@ void Thmap_destroy(void **pphmap)
 int Thmap_insert(void *_phmap, void *key, size_t key_l, void *value, void **old_value)
 {
 	struct hmap *phmap = _phmap;
-	struct list_head *first = NULL;
+	struct hhead *phhead = NULL;
 	struct hnode *phnode = NULL;
 	struct hnode *tmp = NULL;
+	struct list_head *head_node;
 	uint8_t hkey[KEY_MAX];
 	uint32_t hkey_l = 0;
+	int num;
 
 	if (!phmap || !key || !value || !key_l)
-		return -1;
+		return T_EINVAL;
 
-	if (old_value)
-		*old_value = NULL;
+	/* first get hkey */
+	hkey_l = get_key(key, key_l, hkey);
+	/* get node from hkey */
+	tmp = get_node(phmap, hkey, hkey_l);
+	/* if node exists, replace the old value */
+	if (tmp && (tmp->value != value)) {
+		/* if old value pointer exists, return old value */
+		if (old_value)
+			*old_value = tmp->value;
 
-	first = HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l);
-	list_for_each_entry(tmp, first, node) {
-		if (!KEY_CMP(tmp->hkey, hkey, hkey_l)) {
-			if ((tmp->value != value) && old_value)
-				*old_value = tmp->value;
-			tmp->value = value;
-			return 0;
-		}
+		/* replace the old value */
+		tmp->value = value;
+			return T_SUCCESS;
 	}
-
+	/* else  malloc new node, add list*/
 	phnode = malloc(sizeof(*phnode));
 	if (!phnode)
-		return -1;
+		return T_ENOMEM;
 
-	phnode->value = value;
-	memcpy(phnode->hkey, hkey, hkey_l);
-	list_add_tail(&phnode->node, first);
-	Tatomic_addf(&phmap->node_size, 1);
+	set_value(phnode, value);
+	set_key(phnode->hkey, hkey, hkey_l);
 
-	return 0;
+	/* get head num from hkey */
+	num = get_head_num(phmap, hkey, hkey_l);
+	/* get hhead from num */
+	phhead = get_head(phmap, num);
+	/* get head node from hhead */
+	head_node = get_head_node(phhead);
+
+	list_add_tail(&phnode->node, head_node);
+	Tatomic_addf(&phmap->node_allsize, 1);
+	Tatomic_addf(&phhead->node_size, 1);
+
+	return T_SUCCESS;
 }
 
 int Thmap_delete(void *_phmap, void *key, size_t key_l, void **old_value)
 {
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
+	struct hhead *phhead;
 	struct hnode *phnode = NULL;
 	char hkey[KEY_MAX];
 	uint32_t hkey_l = 0;
+	int num;
 
 	if (!phmap || !key)
-		return -1;
+		return T_EINVAL;
 
-	if (old_value)
-		*old_value = NULL;
+	/* first get hkey */
+	hkey_l = get_key(key, key_l, hkey);
+	/* get head num from hkey */
+	num = get_head_num(phmap, hkey, hkey_l);
+	/* get head node from hhead */
+	phhead = get_head(phmap, num);
 
-	first = HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l);
-	list_for_each_entry(phnode, first, node) {
-		if (!KEY_CMP(phnode->hkey, hkey, hkey_l)) {
-			list_del(&phnode->node);
-			if (old_value)
-				*old_value = phnode->value;
-			free(phnode);
-			Tatomic_subf(&(phmap->node_size), 1);
-			break;
-		}
+	/* if hhead is empty, return  error value */
+	if (Tatomic_loadn(&phhead->node_size) == 0)
+		return T_ENOENT;
+
+	/* get node from hkey */
+	phnode = get_node(phmap, hkey, hkey_l);
+	/* if node exists, delete node and free memory */
+	if (phnode && !cmp_key(phnode->hkey, hkey, hkey_l)) {
+		list_del(&phnode->node);
+		/* if old_value pointer exists, return old value */
+		if (old_value)
+			*old_value = phnode->value;
+
+		free(phnode);
+		Tatomic_subf(&(phmap->node_allsize), 1);
+		Tatomic_subf(&(phhead->node_size), 1);
+		return T_SUCCESS;
 	}
 
-	return 0;
+	return T_ENOENT;
 }
 
-void *Thmap_search(void *_phmap, void *key, size_t key_l)
+int Thmap_search(void *_phmap, void *key, size_t key_l, void **value)
 {
 	struct hmap *phmap = _phmap;
 	struct list_head *first = NULL;
@@ -194,20 +279,20 @@ void *Thmap_search(void *_phmap, void *key, size_t key_l)
 	uint32_t hkey_l = 0;
 
 	if (!phmap || !key)
-		return NULL;
+		return T_EINVAL;
 
-	first = HMAP_GET_FIRST(phmap, key, key_l, hkey, hkey_l);
-	list_for_each_entry(phnode, first, node) {
-		if (!KEY_CMP(phnode->hkey, hkey, hkey_l)) {
-			return phnode->value;
-		}
+	hkey_l = get_key(key, key_l, hkey);
+	phnode = get_node(phmap, hkey, hkey_l);
+	if (phnode && !cmp_key(phnode->hkey, hkey, hkey_l)) {
+		*value = phnode->value;
+		return T_SUCCESS;
 	}
 
-	return NULL;
+	return T_ENOENT;
 }
 
 int Thmap_get_node_size(void *_phmap)
 {
 	struct hmap *phmap = _phmap;
-	return Tatomic_loadn(&phmap->node_size);
+	return Tatomic_loadn(&phmap->node_allsize);
 }

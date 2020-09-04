@@ -28,16 +28,24 @@ int main(int argc, const char *argv[])
 	rc = Thmap_insert(phmap, key1, key1_l, value1, NULL);
 	if (rc < 0)
 		printf("Thmap_insert failed\n");
-	
+
 	printf("size:%d\n", Thmap_get_node_size(phmap));
 
-	pvalue = Thmap_search(phmap, key, key_l);
-	if (pvalue)
-		printf("%s\n", pvalue);
+	rc = Thmap_search(phmap, key, key_l, (void **)&pvalue);
+	if (rc < 0) {
+		printf("not found value\n");
+		return 1;
+	}
 
-	pvalue = Thmap_search(phmap, key1, key1_l);
-	if (pvalue)
-		printf("%s\n", pvalue);
+	printf("%s\n", pvalue);
+
+	rc = Thmap_search(phmap, key1, key1_l, (void **)&pvalue);
+	if (rc < 0) {
+		printf("not found value\n");
+		return 1;
+	}
+	
+	printf("%s\n", pvalue);
 
 	rc = Thmap_delete(phmap, key, key_l, NULL);
 	if (rc < 0) {
